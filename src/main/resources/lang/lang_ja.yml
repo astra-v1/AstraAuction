@@ -31,6 +31,9 @@ messages:
   buy:
     ok: "購入しました。"
     fail: "購入に失敗しました。"
+    not_enough: "所持金が不足しています。"
+    own: "自分の出品は購入できません。"
+    not_available: "この出品は現在利用できません。"
   force:
     buy:
       ok: "強制購入しました。"

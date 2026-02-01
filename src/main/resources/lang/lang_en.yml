@@ -31,6 +31,9 @@ messages:
   buy:
     ok: "Purchase successful."
     fail: "Failed to buy the lot."
+    not_enough: "Not enough money to buy this lot."
+    own: "You cannot buy your own lot."
+    not_available: "This lot is no longer available."
   force:
     buy:
       ok: "Lot forcibly bought."

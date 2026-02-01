@@ -376,11 +376,15 @@ public class AuctionGui {
 
 		inventory.setItem(4, display, cancelHandler());
 		bindItem(inventory, player, 2, yes, clicker -> {
-			boolean ok = auctionService.buyNow(clicker, auction.getId());
-			if (ok) {
-				clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
-			} else {
-				clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
+			AuctionService.BuyResult result = auctionService.buyNowWithResult(clicker, auction.getId());
+			switch (result) {
+				case OK -> clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
+				case NOT_ENOUGH_MONEY -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_enough")));
+				case OWN_LOT -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.own")));
+				case NOT_ACTIVE, NOT_FOUND, CONFLICT ->
+					clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_available")));
+				case ECONOMY_MISSING -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
+				default -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
 			}
 			clicker.removeWindow(inventory);
 			reopen.run();

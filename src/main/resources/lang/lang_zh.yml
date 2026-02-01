@@ -31,6 +31,9 @@ messages:
   buy:
     ok: "购买成功。"
     fail: "购买失败。"
+    not_enough: "余额不足，无法购买。"
+    own: "不能购买自己的拍品。"
+    not_available: "该拍品已不可用。"
   force:
     buy:
       ok: "已强制购买该拍品。"

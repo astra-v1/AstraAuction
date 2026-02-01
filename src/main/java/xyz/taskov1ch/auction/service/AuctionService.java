@@ -125,6 +125,53 @@ public class AuctionService {
 		}
 	}
 
+	public BuyResult buyNowWithResult(Player buyer, long id) {
+		try {
+			AuctionItem auction = repository.getAuction(id);
+			if (auction == null) {
+				return BuyResult.NOT_FOUND;
+			}
+			if (!AuctionStatus.ACTIVE.name().equals(auction.getStatus())) {
+				return BuyResult.NOT_ACTIVE;
+			}
+			if (auction.getSellerUuid().equals(buyer.getUniqueId().toString())) {
+				return BuyResult.OWN_LOT;
+			}
+			double price = auction.getCurrentPrice();
+			if (!economyHook.isAvailable()) {
+				return BuyResult.ECONOMY_MISSING;
+			}
+			if (!economyHook.has(buyer, price)) {
+				return BuyResult.NOT_ENOUGH_MONEY;
+			}
+			if (!economyHook.withdraw(buyer, price)) {
+				return BuyResult.WITHDRAW_FAILED;
+			}
+			int updated = repository.tryBuyNow(id, price, price);
+			if (updated == 0) {
+				economyHook.deposit(buyer, price);
+				return BuyResult.CONFLICT;
+			}
+			finishAuction(auction, buyer, price, AuctionStatus.SOLD, false);
+			return BuyResult.OK;
+		} catch (Exception e) {
+			plugin.getLogger().warning("Buy now failed: " + e.getMessage());
+			return BuyResult.ERROR;
+		}
+	}
+
+	public enum BuyResult {
+		OK,
+		NOT_FOUND,
+		NOT_ACTIVE,
+		OWN_LOT,
+		ECONOMY_MISSING,
+		NOT_ENOUGH_MONEY,
+		WITHDRAW_FAILED,
+		CONFLICT,
+		ERROR
+	}
+
 	public boolean forceBuy(Player buyer, long id) {
 		try {
 			AuctionItem auction = repository.getAuction(id);

@@ -1,28 +1,40 @@
 database:
-  type: "sqlite" # sqlite | mysql | postgres
+  # Database type: sqlite | mysql | postgres
+  type: "sqlite"
   sqlite:
+    # Folder name inside the server directory
     folder: "database"
+    # SQLite file name (without extension)
     database: "auction"
   mysql:
+    # MySQL connection settings
     host: "localhost"
     port: 3306
     database: "auction"
     username: "root"
     password: ""
   postgres:
+    # PostgreSQL connection settings
     host: "localhost"
     port: 5432
     database: "auction"
     username: "postgres"
     password: ""
 
+# Language file code (ru, en, ja, zh)
 language: "ru"
 
 auction:
+  # Lot duration in seconds (default: 48 hours)
   duration-seconds: 172800
+  # Commission percent taken from the seller on purchase
   tax-percent: 10.0
+  # Maximum active lots per player (0 = no limit)
   max-slots: 6
+  # Claim storage lifetime in seconds
   claim-expire-seconds: 604800
   gui:
+    # Items per page (max 45)
     page-size: 45
+    # Default sort: price_asc | price_desc
     sort-default: "price_asc"
