@@ -5,6 +5,7 @@ import xyz.taskov1ch.auction.command.AuctionCommand;
 import xyz.taskov1ch.auction.config.ConfigManager;
 import xyz.taskov1ch.auction.database.DatabaseProvider;
 import xyz.taskov1ch.auction.gui.AuctionGui;
+import xyz.taskov1ch.auction.gui.AuctionGuiListener;
 import xyz.taskov1ch.auction.service.AuctionService;
 import xyz.taskov1ch.auction.util.Lang;
 
@@ -29,6 +30,7 @@ public class AstraAuction extends PluginBase {
 		auctionGui = new AuctionGui(auctionService, configManager);
 
 		Lang.init(this, configManager);
+		getServer().getPluginManager().registerEvents(new AuctionGuiListener(auctionGui), this);
 
 		getServer().getCommandMap().register("astraauction", new AuctionCommand(this, auctionService));
 

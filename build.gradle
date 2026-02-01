@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "xyz.taskov1ch.auction"
-version = "0.9.18"
+version = "0.9.19"
 
 java {
 	toolchain {
@@ -18,7 +18,7 @@ repositories {
 	// maven { // TODO: Вернуть когда репозиторий оживет
 	// 	url "https://repo.luminiadev.com/snapshots"
 	// }
-	// maven { // TODO: Вернуть когда репозиторий оживет
+	// maven {
 	// 	name = "luminiadevRepositoryReleases"
 	// 	url = uri("https://repo.luminiadev.com/releases")
 	// }
