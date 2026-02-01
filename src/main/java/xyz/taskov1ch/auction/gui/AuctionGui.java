@@ -3,6 +3,7 @@ package xyz.taskov1ch.auction.gui;
 import cn.nukkit.Player;
 import cn.nukkit.inventory.InventoryType;
 import cn.nukkit.item.Item;
+import cn.nukkit.level.Sound;
 import cn.nukkit.level.Position;
 import cn.nukkit.scheduler.AsyncTask;
 import cn.nukkit.Server;
@@ -377,6 +378,7 @@ public class AuctionGui {
 		inventory.setItem(4, display, cancelHandler());
 		bindItem(inventory, player, 2, yes, clicker -> {
 			AuctionService.BuyResult result = auctionService.buyNowWithResult(clicker, auction.getId());
+			playBuyFeedback(clicker, result == AuctionService.BuyResult.OK);
 			switch (result) {
 				case OK -> clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
 				case NOT_ENOUGH_MONEY -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_enough")));
@@ -395,6 +397,17 @@ public class AuctionGui {
 		});
 
 		openWindow(player, inventory);
+	}
+
+	private void playBuyFeedback(Player player, boolean success) {
+		if (player == null || player.getLevel() == null) {
+			return;
+		}
+		Sound sound = success ? Sound.RANDOM_LEVELUP : Sound.RANDOM_ANVIL_LAND;
+		try {
+			player.getLevel().addSound(player, sound, 1f, 1f, player);
+		} catch (Exception ignored) {
+		}
 	}
 
 	private void openWindow(Player player, FakeInventory inventory) {
