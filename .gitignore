@@ -1,0 +1,16 @@
+.vscode
+.idea
+target/
+build/
+.gradle/
+out/
+*.log
+logs/
+run/
+.settings/
+*.iml
+*.class
+*.jar
+.DS_Store
+*.swp
+*.swo

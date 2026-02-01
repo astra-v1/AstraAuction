@@ -1,0 +1,93 @@
+prefix: "&8[&6AstraAuction&8]&r "
+messages:
+  only-player: "このコマンドはプレイヤーのみ使用できます。"
+  usage:
+    sell: "使い方: /ah sell <価格>"
+    view: "使い方: /ah view <プレイヤー>"
+    search: "使い方: /ah search <名前>"
+    force_buy: "使い方: /ah force_buy <id>"
+    force_expire: "使い方: /ah force_expire <id>"
+  price-positive: "価格は0より大きい必要があります。"
+  item-in-hand: "手にアイテムを持ってください。"
+  slots-limit: "出品上限に達しました。"
+  lot-listed: "出品しました。ID: {id}"
+  no-permission: "このコマンドを実行する権限がありません。"
+  help:
+    open: "/ah - GUIを開く"
+    sell: "/ah sell <価格> - 出品する"
+    view: "/ah view <プレイヤー> - プレイヤーの出品を見る"
+    search: "/ah search <名前> - 名前で検索"
+  claim:
+    received: "受け取り: {count}"
+    single:
+      ok: "倉庫から受け取りました。"
+      fail: "受け取りに失敗しました。"
+  lot:
+    cancel:
+      ok: "出品を取り下げました。"
+      fail: "この出品は取り下げできません。"
+  economy:
+    missing: "EconomyAPI が見つかりません。"
+  buy:
+    ok: "購入しました。"
+    fail: "購入に失敗しました。"
+  force:
+    buy:
+      ok: "強制購入しました。"
+      fail: "強制購入に失敗しました。"
+    expire:
+      ok: "強制的に期限切れにしました。"
+      fail: "強制的に期限切れにできませんでした。"
+  gui:
+    unavailable: "GUI を開けません。FakeInventories を導入してください。"
+  db:
+    stay_still: "動かないでください！"
+    fetching: "データベースからデータを取得しています..."
+    cancel_moved: "操作をキャンセルしました: 移動しました。"
+    error: "データベースエラー。後でもう一度お試しください。"
+
+gui:
+  market:
+    title: "オークション"
+  view:
+    title: "出品一覧: {player}"
+  search:
+    title: "検索: {query}"
+  my:
+    title: "自分の出品"
+  claims:
+    title: "返却倉庫"
+  page: "{page}ページ"
+  nav:
+    back: "戻る"
+    close: "閉じる"
+    next: "次へ"
+    claim_all: "すべて受け取る"
+    my_items: "自分の出品"
+    market: "マーケット"
+    claims: "返却倉庫"
+  sort:
+    price_asc: "価格 ↑"
+    price_asc_selected: "価格 ↑ (選択中)"
+    price_desc: "価格 ↓"
+    price_desc_selected: "価格 ↓ (選択中)"
+  lore:
+    seller: "出品者: {seller}"
+    price: "価格: {price}"
+    remaining: "残り: {time}"
+    id: "ID: {id}"
+    shift_hint: "Shiftで詳細を見る"
+  confirm:
+    title: "購入確認"
+    buy: "購入 {price}"
+    cancel: "キャンセル"
+  claim:
+    take: "クリックで受け取る"
+    money: "コイン"
+    amount: "金額: {amount}"
+
+time:
+  days_hours: "{days}日 {hours}時間"
+  hours_minutes: "{hours}時間 {minutes}分"
+  minutes: "{minutes}分"
+  empty: "-"

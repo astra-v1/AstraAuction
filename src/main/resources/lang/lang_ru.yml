@@ -1,0 +1,93 @@
+prefix: "&8[&6AstraAuction&8]&r "
+messages:
+  only-player: "Команда доступна только игроку."
+  usage:
+    sell: "Использование: /ah sell <цена>"
+    view: "Использование: /ah view <игрок>"
+    search: "Использование: /ah search <название>"
+    force_buy: "Использование: /ah force_buy <id>"
+    force_expire: "Использование: /ah force_expire <id>"
+  price-positive: "Цена должна быть больше 0."
+  item-in-hand: "Возьмите предмет в руку."
+  slots-limit: "Достигнут лимит активных лотов."
+  lot-listed: "Лот выставлен. ID: {id}"
+  no-permission: "Нет прав для этой команды."
+  help:
+    open: "/ah - открыть GUI"
+    sell: "/ah sell <цена> - выставить лот"
+    view: "/ah view <игрок> - лоты игрока"
+    search: "/ah search <название> - поиск по названию"
+  claim:
+    received: "Получено: {count}"
+    single:
+      ok: "Получено из склада."
+      fail: "Не удалось получить предмет."
+  lot:
+    cancel:
+      ok: "Лот снят с продажи."
+      fail: "Нельзя снять лот."
+  economy:
+    missing: "Экономика не обнаружена (EconomyAPI)."
+  buy:
+    ok: "Покупка успешна."
+    fail: "Не удалось купить лот."
+  force:
+    buy:
+      ok: "Лот куплен принудительно."
+      fail: "Не удалось принудительно купить лот."
+    expire:
+      ok: "Лот принудительно просрочен."
+      fail: "Не удалось принудительно просрочить лот."
+  gui:
+    unavailable: "GUI недоступен. Установите FakeInventories."
+  db:
+    stay_still: "Не двигайтесь!"
+    fetching: "Получение данных с БД..."
+    cancel_moved: "Действие отменено: вы сдвинулись."
+    error: "Ошибка БД. Попробуйте позже."
+
+gui:
+  market:
+    title: "Аукцион"
+  view:
+    title: "Лоты: {player}"
+  search:
+    title: "Поиск: {query}"
+  my:
+    title: "Ваши товары"
+  claims:
+    title: "Склад возврата"
+  page: "Стр. {page}"
+  nav:
+    back: "Назад"
+    close: "Закрыть"
+    next: "Вперед"
+    claim_all: "Забрать всё"
+    my_items: "Ваши товары"
+    market: "На рынок"
+    claims: "Склад возврата"
+  sort:
+    price_asc: "Цена ↑"
+    price_asc_selected: "Цена ↑ (выбрано)"
+    price_desc: "Цена ↓"
+    price_desc_selected: "Цена ↓ (выбрано)"
+  lore:
+    seller: "Продавец: {seller}"
+    price: "Цена: {price}"
+    remaining: "Осталось: {time}"
+    id: "ID: {id}"
+    shift_hint: "Shift для просмотра чар"
+  confirm:
+    title: "Подтверждение покупки"
+    buy: "Купить за {price}"
+    cancel: "Отмена"
+  claim:
+    take: "Нажмите, чтобы забрать"
+    money: "Монеты"
+    amount: "Сумма: {amount}"
+
+time:
+  days_hours: "{days}д {hours}ч"
+  hours_minutes: "{hours}ч {minutes}м"
+  minutes: "{minutes}м"
+  empty: "-"
