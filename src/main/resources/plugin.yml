@@ -1,0 +1,15 @@
+name: AstraAuction
+main: xyz.taskov1ch.auction.AstraAuction
+version: 0.9.17
+api: ["1.0.0"]
+description: "Auction plugin scaffold for Lumi (Nukkit-MOT fork)"
+author: "Taskov1ch"
+softdepend: ["EconomyAPI", "FakeInventories"]
+
+permissions:
+  astraauction.use:
+    description: "Use auction command"
+    default: true
+  astraauction.force:
+    description: "Force buy/expire auction lots"
+    default: op

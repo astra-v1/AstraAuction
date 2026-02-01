@@ -1,0 +1,29 @@
+database:
+  type: "sqlite" # sqlite | mysql | postgres
+  sqlite:
+    folder: "database"
+    database: "auction"
+  mysql:
+    host: "localhost"
+    port: 3306
+    database: "auction"
+    username: "root"
+    password: ""
+  postgres:
+    host: "localhost"
+    port: 5432
+    database: "auction"
+    username: "postgres"
+    password: ""
+
+language: "ru"
+
+auction:
+  min-bid-step: 1.0
+  duration-seconds: 172800
+  tax-percent: 10.0
+  max-slots: 6
+  claim-expire-seconds: 604800
+  gui:
+    page-size: 45
+    sort-default: "price_asc"

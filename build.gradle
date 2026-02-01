@@ -1,0 +1,60 @@
+plugins {
+	id "java"
+	id "idea"
+}
+
+group = "xyz.taskov1ch.auction"
+version = "0.9.17"
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
+
+repositories {
+	mavenLocal()
+	mavenCentral()
+	// maven { // TODO: Вернуть когда репозиторий оживет
+	// 	url "https://repo.luminiadev.com/snapshots"
+	// }
+	// maven { // TODO: Вернуть когда репозиторий оживет
+	// 	name = "luminiadevRepositoryReleases"
+	// 	url = uri("https://repo.luminiadev.com/releases")
+	// }
+	maven {
+		name "opencollabRepositoryMavenReleases"
+		url "https://repo.opencollab.dev/maven-releases"
+		content {
+			includeGroup "me.onebone"
+		}
+	}
+	maven {
+		url "https://jitpack.io"
+		content {
+			includeGroup "com.github.hteppl"
+			includeGroup "com.github.astra-v1" // TODO: Удалить когда репозиторий оживет
+			includeGroup "com.github.koshakminedev" // TODO: Удалить когда репозиторий оживет
+		}
+	}
+}
+
+dependencies {
+	implementation "com.github.koshakminedev:lumi:nightly" // TODO: Удалить когда репозиторий оживет
+	// compileOnly("com.koshakmine:Lumi:1.4.0-SNAPSHOT") // TODO: Вернуть когда репозиторий оживет
+	// compileOnly("com.luminiadev.fakeinventories:fakeinventories:1.2.1") // TODO: Вернуть когда репозиторий оживет
+	implementation "com.github.astra-v1:FakeInventories-MOT:d76e9c950f" // TODO: Удалить когда репозиторий оживет
+	implementation "com.github.hteppl:sql2o-nukkit:2.3.0-SNAPSHOT"
+	implementation "me.onebone:economyapi:2.0.3"
+}
+
+tasks.withType(JavaCompile) {
+	options.encoding = "UTF-8"
+}
+
+idea {
+	module {
+		downloadJavadoc = true
+		downloadSources = true
+	}
+}
