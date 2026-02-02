@@ -70,7 +70,6 @@ public final class ItemSerializer {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	private static Item createItem(String namespaceId, int damage, int count) {
 		try {
 			int id = Integer.parseInt(namespaceId);

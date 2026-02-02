@@ -33,8 +33,6 @@ public class AstraAuction extends PluginBase {
 		getServer().getPluginManager().registerEvents(new AuctionGuiListener(auctionGui), this);
 
 		getServer().getCommandMap().register("astraauction", new AuctionCommand(this, auctionService));
-
-		getLogger().info("AstraAuction enabled.");
 	}
 
 	@Override
@@ -42,7 +40,6 @@ public class AstraAuction extends PluginBase {
 		if (databaseProvider != null) {
 			databaseProvider.shutdown();
 		}
-		getLogger().info("AstraAuction disabled.");
 	}
 
 	public static AstraAuction getInstance() {

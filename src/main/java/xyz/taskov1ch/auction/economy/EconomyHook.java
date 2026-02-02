@@ -3,6 +3,7 @@ package xyz.taskov1ch.auction.economy;
 import cn.nukkit.Player;
 
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class EconomyHook {
 	private final boolean available;
@@ -10,12 +11,16 @@ public class EconomyHook {
 	private final Method myMoney;
 	private final Method addMoney;
 	private final Method reduceMoney;
+	private final Method addMoneyUuid;
+	private final Method addMoneyString;
 
 	public EconomyHook() {
 		Object api = null;
 		Method money = null;
 		Method add = null;
 		Method reduce = null;
+		Method addUuid = null;
+		Method addString = null;
 		boolean ok = false;
 		try {
 			Class<?> clazz = Class.forName("me.onebone.economyapi.EconomyAPI");
@@ -23,6 +28,8 @@ public class EconomyHook {
 			money = clazz.getMethod("myMoney", Player.class);
 			add = clazz.getMethod("addMoney", Player.class, double.class);
 			reduce = clazz.getMethod("reduceMoney", Player.class, double.class);
+			addUuid = clazz.getMethod("addMoney", UUID.class, double.class);
+			addString = clazz.getMethod("addMoney", String.class, double.class);
 			ok = true;
 		} catch (Exception ignored) {
 			ok = false;
@@ -32,6 +39,8 @@ public class EconomyHook {
 		this.myMoney = money;
 		this.addMoney = add;
 		this.reduceMoney = reduce;
+		this.addMoneyUuid = addUuid;
+		this.addMoneyString = addString;
 	}
 
 	public boolean isAvailable() {
@@ -69,6 +78,25 @@ public class EconomyHook {
 		try {
 			addMoney.invoke(economyApi, player, amount);
 			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
+
+	public boolean deposit(String uuid, double amount) {
+		if (!available) {
+			return false;
+		}
+		try {
+			if (addMoneyUuid != null) {
+				addMoneyUuid.invoke(economyApi, UUID.fromString(uuid), amount);
+				return true;
+			}
+			if (addMoneyString != null) {
+				addMoneyString.invoke(economyApi, uuid, amount);
+				return true;
+			}
+			return false;
 		} catch (Exception e) {
 			return false;
 		}

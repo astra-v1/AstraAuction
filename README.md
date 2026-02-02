@@ -1,68 +1,82 @@
 <div align="center">
-  <img src="logo.png" alt="AstraAuction logo" width="220" />
+  <img src="assets/logo.png" alt="AstraAuction logo" width="220" />
 
-# 💫 AstraAuction β 💹
-**Плагин рынка (аукциона) для [Lumi](https://github.com/koshakminedev/lumi).**
+# 💫 AstraAuction β
+**Market (Auction) plugin for [Lumi](https://github.com/koshakminedev/lumi).**
+
+**EN** | **[RU](README_ru.md)** | **[UA](README_ua.md)** | **[JA](README_ja.md)** | **[ZH](README_zh.md)**
 
 </div>
 
-## Описание 📖
-AstraAuction — рынок для перепродажи предметов между игроками на [Lumi](https://github.com/koshakminedev/lumi). Плагин сохраняет NBT предметов, хранит данные в базе и предоставляет удобный GUI с поиском, сортировкой и управлением лотами.
+## Description 📖
+AstraAuction is a player-to-player marketplace plugin for [Lumi](https://github.com/koshakminedev/lumi).
+The plugin preserves full item NBT, stores data in a database, and provides a clean and convenient GUI with search, sorting, and lot management.
 
-## Скриншоты 🖼️
-_(скрины)_
+## Features 🌟
+- **NBT preservation** — items are sold exactly as they were owned by the seller.
+- **Asynchronous database** — all queries run in the background without blocking the main thread.
+- **Transaction fee** — configurable tax percentage.
+- **Return storage (claims)** — unsold lots and payments for offline sellers are stored until expiration.
+- **GUI market** — buying, confirmation dialogs, and page navigation.
+- **Sorting and search** — sort by price and search by item name.
+- **Manage your lots** — view and cancel active lots via GUI.
+- **Flexible database support** — SQLite / MySQL / PostgreSQL.
+- **Localization** — built-in support for `ru`, `en`, `ua`, `ja`, `zh`, with the ability to add custom languages.
 
-## Возможности 🌟
-- **Сохранение NBT** — предмет продаётся в точности таким, каким он был у продавца.
-- **Асинхронная БД** — запросы выполняются в фоне, без блокировки основного треда.
-- **Комиссия** — процент удержания настраивается в конфиге.
-- **Склад возврата (claims)** — непроданные лоты и выплаты оффлайн‑продавцам сохраняются до истечения срока хранения.
-- **GUI рынок** — покупка, подтверждение, навигация по страницам.
-- **Сортировка и поиск** — сортировка по цене, поиск по названию предмета.
-- **Управление своими лотами** — просмотр и отмена активных лотов через GUI.
-- **Гибкая БД** — SQLite / MySQL / PostgreSQL.
-- **Локализация** — `ru` / `en` / `ja` / `zh` с коробки, а так же возможность добавлять свои языки.
+## Screenshots 🖼️
+| **Main market page** | **My lots page** |
+|---|---|
+| ![](assets/base.jpg) | ![](assets/my_lots.jpg) |
 
-## Быстрый старт ⚡
-1. Установите плагин на сервер и перезапустите.
-2. Укажите тип БД и язык в [config.yml](src/main/resources/config.yml).
-3. Откройте рынок: `/ah`.
-4. Выставьте предмет в руке: `/ah sell <price>`.
+| **Return storage page** | **Purchase confirmation page** |
+|---|---|
+| ![](assets/claims.jpg) | ![](assets/confirm.jpg) |
 
-## Команды
-| **Команда** | **Описание** | **Пермишен** |
+## Commands ♿
+| **Command** | **Description** | **Permission** |
 |---|---|---|
-| `/ah` | Открыть рынок | `astraauction.use` |
-| `/ah open,gui [page: int]` | Открыть рынок на странице | `astraauction.use` |
-| `/ah sell <price: int>` | Выставить предмет в руке | `astraauction.use` |
-| `/ah view <nickname: str> [page: int]` | Лоты конкретного игрока | `astraauction.use` |
-| `/ah search <query: str> [page: int]` | Поиск по названию лота | `astraauction.use` |
-| `/ah force_buy <id: int>` | Принудительно купить лот (процесс всё равно будет проходить как обычная покупка) | `astraauction.force` |
-| `/ah force_expire <id: int>` | Принудительно истечь лот | `astraauction.force` |
+| `/ah` | Open the market | `astraauction.use` |
+| `/ah open,gui [page: int]` | Open the market at a specific page | `astraauction.use` |
+| `/ah sell <price: int>` | List the item in hand | `astraauction.use` |
+| `/ah view <nickname: str> [page: int]` | View lots of a specific player | `astraauction.use` |
+| `/ah search <query: str> [page: int]` | Search lots by name | `astraauction.use` |
+| `/ah force_buy <id: int>` | Force-buy a lot (processed like a normal purchase) | `astraauction.force` |
+| `/ah force_expire <id: int>` | Force-expire a lot | `astraauction.force` |
 
-**Алиасы команды:** `/auction`, `/auc`.
+**Command aliases:** `/auction`, `/auc`.
 
-## Права 🔐
-- `astraauction.use` — доступ к основным командам (доступен всем по умолчанию).
-- `astraauction.force` — доступ к принудительным командам (по умолчанию никому кроме операторов не доступен).
+## Permissions 🔐
+- `astraauction.use` — access to basic commands (granted to everyone by default).
+- `astraauction.force` — access to force commands (granted to operators only by default).
 
-## Конфигурация ⚙️
-Основные настройки в [config.yml](src/main/resources/config.yml):
+## Configuration ⚙️
+Main configuration file: [config.yml](src/main/resources/config.yml)
 
-| Параметр | Описание | По умолчанию |
+| Parameter | Description | Default |
 |---|---|---|
-| `database.type` | Тип БД: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | Язык сообщений | `ru` |
-| `auction.duration-seconds` | Время жизни лота (сек) | `172800` (48h) |
-| `auction.tax-percent` | Комиссия (%) | `10.0` |
-| `auction.max-slots` | Макс. активных лотов (0 — без лимита) | `6` |
-| `auction.claim-expire-seconds` | Срок хранения склада (сек) | `604800` (7d) |
-| `auction.gui.page-size` | Размер страницы (до 45) | `45` |
-| `auction.gui.sort-default` | Сортировка по умолчанию | `price_asc` |
+| `database.type` | Database type: `sqlite` / `mysql` / `postgres` | `sqlite` |
+| `language` | Message language | `ru` |
+| `auction.duration-seconds` | Lot lifetime (seconds) | `172800` (48h) |
+| `auction.tax-percent` | Transaction fee (%) | `10.0` |
+| `auction.max-slots` | Max active lots (0 = unlimited) | `6` |
+| `auction.claim-expire-seconds` | Claims storage duration (seconds) | `604800` (7d) |
+| `auction.gui.page-size` | GUI page size (up to 45) | `45` |
+| `auction.gui.sort-default` | Default sorting | `price_asc` |
 
-## Зависимости 🔌
-- **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — требуется для покупок и выплат.
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — требуется для GUI.
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** _(бывший **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)_ — требуется для работы базы данных.
+## Dependencies 🔌
+- **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — required for purchases and payouts.
+- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — required for GUI support.
+- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(formerly **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — required for database support.
 
-## _(todo)_
+## Building from Source 🔨
+1. Install **[JDK 21+](https://www.google.com/search?q=jdk+21)**.
+2. [Clone the repository](https://www.google.com/search?q=how+to+clone+git+repository) and open the project directory.
+3. Run the build command: `./gradlew build`
+4. The compiled JAR will be located in `build/libs`.
+
+### Build Warning ⚠️
+The repository contains two `build.gradle` files:
+one main file (using Lumi repositories) and another with the `.old` suffix (without Lumi repositories, everything via `jitpack.io`).
+
+If Lumi repositories are temporarily unavailable (e.g. HTTP 500 errors) and the build fails, use `build.gradle.old`.
+Simply remove or move the current `build.gradle`, and rename `build.gradle.old` by removing the `.old` suffix.

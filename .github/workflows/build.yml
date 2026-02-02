@@ -3,7 +3,11 @@ name: CI
 on:
   push:
     branches:
-      - main
+      - master
+    paths-ignore:
+      - assets/**
+      - README*.md
+      - build.gradle.old
   workflow_dispatch:
 
 permissions:
@@ -22,7 +26,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "25"
+          java-version: "21"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -41,7 +45,7 @@ jobs:
         run: gradle build -x test --no-daemon
 
       - name: Create tag
-        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/master'
         run: |
           TAG="v${{ steps.version.outputs.version }}"
           if git rev-parse "refs/tags/$TAG" >/dev/null 2>&1; then

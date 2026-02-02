@@ -332,7 +332,10 @@ public class AuctionService {
 		if (seller != null) {
 			economyHook.deposit(seller, payout);
 		} else {
-			addClaim(auction.getSellerUuid(), null, payout, "payment");
+			boolean paid = economyHook.deposit(auction.getSellerUuid(), payout);
+			if (!paid) {
+				plugin.getLogger().warning("Failed to pay seller (offline) for auction id " + auction.getId());
+			}
 		}
 	}
 

@@ -4,17 +4,24 @@ plugins {
 }
 
 group = "xyz.taskov1ch.auction"
-version = "0.9.21"
+version = "0.0.1"
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
 repositories {
 	mavenLocal()
 	mavenCentral()
+	maven {
+		url "https://repo.luminiadev.com/snapshots"
+	}
+	maven {
+		name = "luminiadevRepositoryReleases"
+		url = uri("https://repo.luminiadev.com/releases")
+	}
 	maven {
 		name "opencollabRepositoryMavenReleases"
 		url "https://repo.opencollab.dev/maven-releases"
@@ -26,15 +33,13 @@ repositories {
 		url "https://jitpack.io"
 		content {
 			includeGroup "com.github.hteppl"
-			includeGroup "com.github.astra-v1"
-			includeGroup "com.github.koshakminedev"
 		}
 	}
 }
 
 dependencies {
-	implementation "com.github.koshakminedev:lumi:nightly"
-	implementation "com.github.astra-v1:FakeInventories-MOT:d76e9c950f"
+	compileOnly("com.koshakmine:Lumi:1.4.0-SNAPSHOT")
+	compileOnly("com.luminiadev.fakeinventories:fakeinventories:1.2.1")
 	implementation "com.github.hteppl:sql2o-nukkit:2.3.0-SNAPSHOT"
 	implementation "me.onebone:economyapi:2.0.3"
 }
