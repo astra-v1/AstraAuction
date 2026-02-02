@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "xyz.taskov1ch.auction"
-version = "0.9.21"
+version = "0.9.23"
 
 java {
 	toolchain {

@@ -39,6 +39,7 @@ public class AuctionGui {
 	private final Map<UUID, AuctionSortMode> sortModeByPlayer = new HashMap<>();
 	private final Map<UUID, Long> dbNoticeByPlayer = new HashMap<>();
 	private final Map<UUID, ClickContext> clickContextByPlayer = new HashMap<>();
+	private final Map<UUID, LastAction> lastActionByPlayer = new HashMap<>();
 
 	public AuctionGui(AuctionService auctionService, ConfigManager configManager) {
 		this.auctionService = auctionService;
@@ -139,8 +140,7 @@ public class AuctionGui {
 							} else {
 								clicker.sendMessage(MessageUtil.error(Lang.t("messages.claim.single.fail")));
 							}
-							clicker.removeWindow(inventory);
-							openClaims(clicker, pageNumber);
+							reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
 						});
 						slot++;
 					}
@@ -153,16 +153,13 @@ public class AuctionGui {
 					bindItem(inventory, player, 48, navItem(54, Lang.t("gui.nav.claim_all")), clicker -> {
 						int count = auctionService.claim(clicker);
 						clicker.sendMessage(MessageUtil.success(Lang.t("messages.claim.received", "count", count)));
-						clicker.removeWindow(inventory);
-						openClaims(clicker, pageNumber);
+						reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
 					});
 					bindItem(inventory, player, 47, navItem(54, Lang.t("gui.nav.my_items")), clicker -> {
-						clicker.removeWindow(inventory);
-						openMyItems(clicker, 1);
+						reopenAfterClose(clicker, inventory, () -> openMyItems(clicker, 1));
 					});
 					bindItem(inventory, player, 51, navItem(54, Lang.t("gui.nav.market")), clicker -> {
-						clicker.removeWindow(inventory);
-						openMain(clicker, 1);
+						reopenAfterClose(clicker, inventory, () -> openMain(clicker, 1));
 					});
 
 					openWindow(player, inventory);
@@ -279,27 +276,24 @@ public class AuctionGui {
 					} else {
 						clicker.sendMessage(MessageUtil.error(Lang.t("messages.lot.cancel.fail")));
 					}
-					reopen.run();
+					reopenAfterClose(clicker, inventory, reopen);
 					return;
 				}
 				if (!auctionService.isEconomyAvailable()) {
 					clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
 					return;
 				}
-				clicker.removeWindow(inventory);
-				openConfirmBuy(clicker, auction, reopen);
+				reopenAfterClose(clicker, inventory, () -> openConfirmBuy(clicker, auction, reopen));
 			});
 		}
 
 		addBottomBar(inventory, player, page, items.size() >= pageSize,
 				() -> {
-					player.removeWindow(inventory);
-					openMarketPage(player, page - 1, viewType, filter);
+					reopenAfterClose(player, inventory, () -> openMarketPage(player, page - 1, viewType, filter));
 				},
 				() -> player.removeWindow(inventory),
 				() -> {
-					player.removeWindow(inventory);
-					openMarketPage(player, page + 1, viewType, filter);
+					reopenAfterClose(player, inventory, () -> openMarketPage(player, page + 1, viewType, filter));
 				});
 
 		bindItem(inventory, player, 46, navItem(399,
@@ -307,24 +301,20 @@ public class AuctionGui {
 						: Lang.t("gui.sort.price_asc")),
 				clicker -> {
 					setSortMode(clicker, AuctionSortMode.PRICE_ASC);
-					clicker.removeWindow(inventory);
-					reopen.run();
+					reopenAfterClose(clicker, inventory, reopen);
 				});
 		bindItem(inventory, player, 52, navItem(399,
 				sortMode == AuctionSortMode.PRICE_DESC ? Lang.t("gui.sort.price_desc_selected")
 						: Lang.t("gui.sort.price_desc")),
 				clicker -> {
 					setSortMode(clicker, AuctionSortMode.PRICE_DESC);
-					clicker.removeWindow(inventory);
-					reopen.run();
+					reopenAfterClose(clicker, inventory, reopen);
 				});
 		bindItem(inventory, player, 47, navItem(54, Lang.t("gui.nav.my_items")), clicker -> {
-			clicker.removeWindow(inventory);
-			openMyItems(clicker, 1);
+			reopenAfterClose(clicker, inventory, () -> openMyItems(clicker, 1));
 		});
 		bindItem(inventory, player, 51, navItem(394, Lang.t("gui.nav.claims")), clicker -> {
-			clicker.removeWindow(inventory);
-			openClaims(clicker, 1);
+			reopenAfterClose(clicker, inventory, () -> openClaims(clicker, 1));
 		});
 
 		openWindow(player, inventory);
@@ -388,12 +378,10 @@ public class AuctionGui {
 				case ECONOMY_MISSING -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
 				default -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
 			}
-			clicker.removeWindow(inventory);
-			reopen.run();
+			reopenAfterClose(clicker, inventory, reopen);
 		});
 		bindItem(inventory, player, 6, no, clicker -> {
-			clicker.removeWindow(inventory);
-			reopen.run();
+			reopenAfterClose(clicker, inventory, reopen);
 		});
 
 		openWindow(player, inventory);
@@ -433,9 +421,23 @@ public class AuctionGui {
 		}
 	}
 
+	private void reopenAfterClose(Player player, FakeInventory inventory, Runnable action) {
+		AstraAuction plugin = AstraAuction.getInstance();
+		player.removeWindow(inventory);
+		if (plugin == null) {
+			action.run();
+			return;
+		}
+		plugin.getServer().getScheduler().scheduleDelayedTask(plugin, action, 1);
+	}
+
 	private void bindItem(FakeInventory inventory, Player player, int slot, Item item,
 			java.util.function.Consumer<Player> action) {
-		inventory.setItem(slot, item, (clickedItem, event) -> event.setCancelled(true));
+		inventory.setItem(slot, item, (clickedItem, event) -> {
+			event.setCancelled(true);
+			Player clicker = event.getTransaction().getSource();
+			handleSlotAction(clicker, inventory, slot);
+		});
 		ClickContext context = clickContextByPlayer.get(player.getUniqueId());
 		if (context == null || context.inventory != inventory) {
 			context = new ClickContext(inventory);
@@ -445,8 +447,15 @@ public class AuctionGui {
 	}
 
 	public void handleClick(Player player, FakeInventory inventory, int slot) {
+		handleSlotAction(player, inventory, slot);
+	}
+
+	private void handleSlotAction(Player player, FakeInventory inventory, int slot) {
 		ClickContext context = clickContextByPlayer.get(player.getUniqueId());
 		if (context == null || context.inventory != inventory) {
+			return;
+		}
+		if (shouldSkipAction(player.getUniqueId(), slot)) {
 			return;
 		}
 		java.util.function.Consumer<Player> action = context.handlers.get(slot);
@@ -455,11 +464,22 @@ public class AuctionGui {
 		}
 	}
 
+	private boolean shouldSkipAction(UUID playerId, int slot) {
+		long now = System.currentTimeMillis();
+		LastAction lastAction = lastActionByPlayer.get(playerId);
+		if (lastAction != null && lastAction.slot == slot && now - lastAction.at < 200) {
+			return true;
+		}
+		lastActionByPlayer.put(playerId, new LastAction(slot, now));
+		return false;
+	}
+
 	public void handleClose(Player player, FakeInventory inventory) {
 		ClickContext context = clickContextByPlayer.get(player.getUniqueId());
 		if (context != null && context.inventory == inventory) {
 			clickContextByPlayer.remove(player.getUniqueId());
 		}
+		lastActionByPlayer.remove(player.getUniqueId());
 	}
 
 	public boolean isTracked(Player player, FakeInventory inventory) {
@@ -540,6 +560,16 @@ public class AuctionGui {
 
 		private ClickContext(FakeInventory inventory) {
 			this.inventory = inventory;
+		}
+	}
+
+	private static class LastAction {
+		private final int slot;
+		private final long at;
+
+		private LastAction(int slot, long at) {
+			this.slot = slot;
+			this.at = at;
 		}
 	}
 }
