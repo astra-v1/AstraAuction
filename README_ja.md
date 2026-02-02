@@ -65,8 +65,9 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 
 ## 依存関係 🔌
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — 購入と支払いに必須。
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — GUI 用に必須。
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(旧 **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — DB 対応に必須。
+- **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — GUI 用に必須。
+- **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — JOOQ ORM によるデータベース対応。
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 動的言語読み込みのローカライズエンジン。
 
 ## ソースからビルド 🔨
 1. **[JDK 21+](https://www.google.com/search?q=jdk+21)** をインストール。

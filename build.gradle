@@ -1,6 +1,7 @@
 plugins {
 	id "java"
 	id "idea"
+	id "com.gradleup.shadow" version "9.3.1"
 }
 
 group = "xyz.taskov1ch.auction"
@@ -23,24 +24,49 @@ repositories {
 		}
 	}
 	maven {
+		name = "densyRepositorySnapshots"
+		url = uri("https://repo.densy.org/snapshots")
+	}
+	maven {
 		url "https://jitpack.io"
 		content {
-			includeGroup "com.github.hteppl"
-			includeGroup "com.github.astra-v1"
 			includeGroup "com.github.koshakminedev"
+			includeGroup "com.github.LuminiaDev"
+			includeGroup "com.github.MEFRREEX"
 		}
 	}
 }
 
 dependencies {
 	implementation "com.github.koshakminedev:lumi:nightly"
-	implementation "com.github.astra-v1:FakeInventories-MOT:d76e9c950f"
-	implementation "com.github.hteppl:sql2o-nukkit:2.3.0-SNAPSHOT"
+	compileOnly "com.github.LuminiaDev:FakeInventories:1.2.1"
+	implementation "com.github.MEFRREEX:JOOQConnector:1.0.1"
+	implementation "org.jooq:jooq:3.19.7"
 	implementation "me.onebone:economyapi:2.0.3"
+	compileOnly "org.densy.polyglot:api:1.1.1-SNAPSHOT"
+	compileOnly "org.densy.polyglot:core:1.1.1-SNAPSHOT"
+	compileOnly "org.densy.polyglot:common:1.1.1-SNAPSHOT"
+	shadow "org.densy.polyglot:api:1.1.1-SNAPSHOT"
+	shadow "org.densy.polyglot:core:1.1.1-SNAPSHOT"
+	shadow "org.densy.polyglot:common:1.1.1-SNAPSHOT"
+	implementation "org.postgresql:postgresql:42.7.4"
 }
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
+}
+
+jar {
+	enabled = false
+}
+
+shadowJar {
+	configurations = [project.configurations.shadow]
+	archiveClassifier.set("")
+}
+
+assemble {
+	dependsOn shadowJar
 }
 
 idea {

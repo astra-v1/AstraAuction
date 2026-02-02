@@ -3,6 +3,7 @@ package xyz.taskov1ch.auction.util;
 import cn.nukkit.item.Item;
 import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
+import cn.nukkit.network.protocol.ProtocolInfo;
 
 import java.util.Base64;
 
@@ -12,7 +13,7 @@ public final class ItemSerializer {
 
 	public static String toBase64(Item item) {
 		try {
-			CompoundTag tag = NBTIO.putItemHelper(item);
+			CompoundTag tag = putItemHelper(item);
 			byte[] bytes = NBTIO.write(tag);
 			return Base64.getEncoder().encodeToString(bytes);
 		} catch (Exception e) {
@@ -24,6 +25,17 @@ public final class ItemSerializer {
 		if (data == null || data.isEmpty()) {
 			return fallback;
 		}
+		try {
+			byte[] bytes = Base64.getDecoder().decode(data);
+			CompoundTag tag = NBTIO.read(bytes);
+			Item item = NBTIO.getItemHelper(tag);
+			return item == null || item.isNull() ? fallback : item;
+		} catch (Exception e) {
+			return decodeLegacy(data, fallback);
+		}
+	}
+
+	private static Item decodeLegacy(String data, Item fallback) {
 		try {
 			if (data.startsWith("v2|")) {
 				String payload = data.substring(3);
@@ -45,29 +57,44 @@ public final class ItemSerializer {
 				}
 				return item;
 			}
-			if (!data.contains(":")) {
-				byte[] bytes = Base64.getDecoder().decode(data);
-				CompoundTag tag = NBTIO.read(bytes);
-				Item item = NBTIO.getItemHelper(tag);
-				return item == null || item.isNull() ? fallback : item;
+			if (data.contains(":")) {
+				String[] parts = data.split(":", 4);
+				if (parts.length < 4) {
+					return fallback;
+				}
+				int id = Integer.parseInt(parts[0]);
+				int damage = Integer.parseInt(parts[1]);
+				int count = Integer.parseInt(parts[2]);
+				Item item = Item.get(id, damage, count);
+				if (parts[3] != null && !parts[3].isEmpty()) {
+					byte[] bytes = Base64.getDecoder().decode(parts[3]);
+					CompoundTag tag = NBTIO.read(bytes);
+					item.setNamedTag(tag);
+				}
+				return item;
 			}
-			String[] parts = data.split(":", 4);
-			if (parts.length < 4) {
-				return fallback;
-			}
-			int id = Integer.parseInt(parts[0]);
-			int damage = Integer.parseInt(parts[1]);
-			int count = Integer.parseInt(parts[2]);
-			Item item = Item.get(id, damage, count);
-			if (parts[3] != null && !parts[3].isEmpty()) {
-				byte[] bytes = Base64.getDecoder().decode(parts[3]);
-				CompoundTag tag = NBTIO.read(bytes);
-				item.setNamedTag(tag);
-			}
-			return item;
-		} catch (Exception e) {
-			return fallback;
+		} catch (Exception ignored) {
 		}
+		return fallback;
+	}
+
+	private static CompoundTag putItemHelper(Item item) {
+		try {
+			for (java.lang.reflect.Method method : NBTIO.class.getMethods()) {
+				if (!"putItemHelper".equals(method.getName())) {
+					continue;
+				}
+				Class<?>[] params = method.getParameterTypes();
+				if (params.length == 2 && params[0] == Item.class && params[1] == boolean.class) {
+					return (CompoundTag) method.invoke(null, item, true);
+				}
+				if (params.length == 4 && params[0] == Item.class && params[3] == boolean.class) {
+					return (CompoundTag) method.invoke(null, item, null, ProtocolInfo.CURRENT_PROTOCOL, true);
+				}
+			}
+		} catch (Exception ignored) {
+		}
+		return NBTIO.putItemHelper(item);
 	}
 
 	private static Item createItem(String namespaceId, int damage, int count) {

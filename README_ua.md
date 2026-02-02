@@ -65,8 +65,9 @@ AstraAuction — ринок для перепродажу предметів м�
 
 ## Залежності 🔌
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — потрібен для покупок і виплат.
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — потрібен для GUI.
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(колишній **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — потрібен для роботи з базою даних.
+- **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — потрібен для GUI.
+- **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — робота з базою даних через ORM JOOQ.
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — рушій локалізацій з динамічним завантаженням мов.
 
 ## Самостійна збірка 🔨
 1. Встановіть **[JDK 21+](https://www.google.com/search?q=jdk+21)**.

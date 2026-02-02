@@ -3,7 +3,7 @@ package xyz.taskov1ch.auction;
 import cn.nukkit.plugin.PluginBase;
 import xyz.taskov1ch.auction.command.AuctionCommand;
 import xyz.taskov1ch.auction.config.ConfigManager;
-import xyz.taskov1ch.auction.database.DatabaseProvider;
+import xyz.taskov1ch.auction.repository.DatabaseProvider;
 import xyz.taskov1ch.auction.gui.AuctionGui;
 import xyz.taskov1ch.auction.gui.AuctionGuiListener;
 import xyz.taskov1ch.auction.service.AuctionService;

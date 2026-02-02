@@ -65,8 +65,9 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 
 ## Dependencies 🔌
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — required for purchases and payouts.
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — required for GUI support.
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(formerly **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — required for database support.
+- **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — required for GUI support.
+- **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — database support via JOOQ ORM.
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — localization engine for dynamic language loading.
 
 ## Building from Source 🔨
 1. Install **[JDK 21+](https://www.google.com/search?q=jdk+21)**.

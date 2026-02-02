@@ -65,8 +65,9 @@ AstraAuction 是 [Lumi](https://github.com/koshakminedev/lumi) 的玩家间交�
 
 ## 依赖 🔌
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — 购买与结算必需。
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — GUI 必需。
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(前身 **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — 数据库支持必需。
+- **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — GUI 必需。
+- **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — 基于 JOOQ ORM 的数据库支持。
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 支持动态语言加载的本地化引擎。
 
 ## 从源码构建 🔨
 1. 安装 **[JDK 21+](https://www.google.com/search?q=jdk+21)**。
