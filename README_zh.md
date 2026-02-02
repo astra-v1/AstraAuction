@@ -76,7 +76,7 @@ AstraAuction 是 [Lumi](https://github.com/koshakminedev/lumi) 的玩家间交�
 
 ### 构建注意事项 ⚠️
 仓库中提供了两个 `build.gradle` 文件:
-一个是主文件（使用 Lumi 仓库），另一个带 `.old` 后缀（不使用 Lumi 仓库，全部通过 `jitpack.io`）。
+一个是主文件（使用备用仓库通过 `jitpack.io`），另一个带 `.old` 后缀（使用原始 Lumi 仓库）。
 
-当 Lumi 仓库暂时不可用（例如 HTTP 500）导致构建失败时，请使用 `build.gradle.old`。
-只需临时删除（或移动）当前的 `build.gradle`，并将 `build.gradle.old` 去掉 `.old` 后缀即可。
+当 Lumi 仓库暂时不可用（例如 HTTP 500）导致构建失败时，直接使用当前的 `build.gradle` 即可。
+或者，如果想使用原始 Lumi 仓库，只需临时删除（或移动）当前的 `build.gradle`，并将 `build.gradle.old` 去掉 `.old` 后缀即可。

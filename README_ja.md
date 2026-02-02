@@ -76,7 +76,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 
 ### ビルドに関する注意 ⚠️
 このリポジトリには `build.gradle` が 2 つあります:
-1 つは本体（Lumi のリポジトリ使用）、もう 1 つは `.old` 付き（Lumi のリポジトリなし、すべて `jitpack.io` から取得）。
+1 つは本体（`jitpack.io` の代替リポジトリを使用）、もう 1 つは `.old` 付き（Lumi の公式リポジトリ使用）。
 
-Lumi のリポジトリが一時的に利用不可（例: HTTP 500）でビルドに失敗する場合は `build.gradle.old` を使用してください。
-現在の `build.gradle` を一時的に削除（または移動）し、`build.gradle.old` の `.old` を外せば OK です。
+Lumi のリポジトリが一時的に利用不可（例: HTTP 500）でビルドに失敗する場合は、現在の `build.gradle` をそのまま使用してください。
+または、Lumi の公式リポジトリを使用する場合は、現在の `build.gradle` を削除（または移動）し、`build.gradle.old` の `.old` を外してください。

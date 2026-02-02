@@ -76,7 +76,7 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 
 ### Build Warning ⚠️
 The repository contains two `build.gradle` files:
-one main file (using Lumi repositories) and another with the `.old` suffix (without Lumi repositories, everything via `jitpack.io`).
+one main file (using fallback repositories via `jitpack.io`) and another with the `.old` suffix (with original Lumi repositories).
 
-If Lumi repositories are temporarily unavailable (e.g. HTTP 500 errors) and the build fails, use `build.gradle.old`.
-Simply remove or move the current `build.gradle`, and rename `build.gradle.old` by removing the `.old` suffix.
+If Lumi repositories are temporarily unavailable (e.g. HTTP 500 errors) and the build fails, just use the current `build.gradle` as-is.
+Alternatively, to use the original Lumi repositories, remove or move the current `build.gradle`, and rename `build.gradle.old` by removing the `.old` suffix.

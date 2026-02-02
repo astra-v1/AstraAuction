@@ -44,6 +44,11 @@ jobs:
       - name: Build
         run: gradle build -x test --no-daemon
 
+      - name: Configure Git
+        run: |
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+
       - name: Create tag
         if: github.ref == 'refs/heads/master'
         run: |
