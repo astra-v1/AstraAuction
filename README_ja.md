@@ -55,7 +55,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 | パラメータ | 説明 | デフォルト |
 |---|---|---|
 | `database.type` | DB タイプ: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | メッセージ言語 | `ru` |
+| `language` | メッセージ言語 | `en` |
 | `auction.duration-seconds` | ロット有効時間（秒） | `172800` (48h) |
 | `auction.tax-percent` | 取引手数料（%） | `10.0` |
 | `auction.max-slots` | 同時出品数の上限（0 = 無制限） | `6` |
@@ -67,7 +67,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — 購入と支払いに必須。
 - **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — GUI 用に必須。
 - **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — JOOQ ORM によるデータベース対応。
-- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 動的言語読み込みのローカライズエンジン。
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 動的言語読み込みのローカライズエンジン（シェード済み）。
 
 ## ソースからビルド 🔨
 1. **[JDK 21+](https://www.google.com/search?q=jdk+21)** をインストール。

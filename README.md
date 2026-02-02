@@ -55,7 +55,7 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 | Parameter | Description | Default |
 |---|---|---|
 | `database.type` | Database type: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | Message language | `ru` |
+| `language` | Message language | `en` |
 | `auction.duration-seconds` | Lot lifetime (seconds) | `172800` (48h) |
 | `auction.tax-percent` | Transaction fee (%) | `10.0` |
 | `auction.max-slots` | Max active lots (0 = unlimited) | `6` |
@@ -67,7 +67,7 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — required for purchases and payouts.
 - **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — required for GUI support.
 - **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — database support via JOOQ ORM.
-- **[Polyglot](https://github.com/DensyDev/Polyglot)** — localization engine for dynamic language loading.
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — localization engine for dynamic language loading (shaded).
 
 ## Building from Source 🔨
 1. Install **[JDK 21+](https://www.google.com/search?q=jdk+21)**.

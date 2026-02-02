@@ -134,13 +134,18 @@ public class AuctionGui {
 						Item view = buildClaimItem(claim);
 						int claimSlot = slot;
 						bindItem(inventory, player, claimSlot, view, clicker -> {
-							boolean ok = auctionService.claimSingle(clicker, claim.getId());
-							if (ok) {
-								clicker.sendMessage(MessageUtil.success(Lang.t("messages.claim.single.ok")));
-							} else {
-								clicker.sendMessage(MessageUtil.error(Lang.t("messages.claim.single.fail")));
-							}
-							reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+							runDbAction(clicker,
+									() -> auctionService.claimSingle(clicker, claim.getId()),
+									ok -> {
+										if (ok) {
+											clicker.sendMessage(
+													MessageUtil.success(Lang.t("messages.claim.single.ok")));
+										} else {
+											clicker.sendMessage(
+													MessageUtil.error(Lang.t("messages.claim.single.fail")));
+										}
+										reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+									});
 						});
 						slot++;
 					}
@@ -151,9 +156,13 @@ public class AuctionGui {
 							() -> player.removeWindow(inventory),
 							() -> openClaims(player, pageNumber + 1));
 					bindItem(inventory, player, 48, navItem(54, Lang.t("gui.nav.claim_all")), clicker -> {
-						int count = auctionService.claim(clicker);
-						clicker.sendMessage(MessageUtil.success(Lang.t("messages.claim.received", "count", count)));
-						reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+						runDbAction(clicker,
+								() -> auctionService.claim(clicker),
+								count -> {
+									clicker.sendMessage(MessageUtil.success(
+											Lang.t("messages.claim.received", "count", count)));
+									reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+								});
 					});
 					bindItem(inventory, player, 47, navItem(54, Lang.t("gui.nav.my_items")), clicker -> {
 						reopenAfterClose(clicker, inventory, () -> openMyItems(clicker, 1));
@@ -197,6 +206,41 @@ public class AuctionGui {
 				}
 				if (hasMoved(player, start)) {
 					player.sendMessage(MessageUtil.error(Lang.t(LANG_DB_CANCEL_MOVED)));
+					return;
+				}
+				Object result = getResult();
+				if (result instanceof Exception e) {
+					player.sendMessage(MessageUtil.error(Lang.t(LANG_DB_ERROR)));
+					plugin.getLogger().warning("DB query failed: " + e.getMessage());
+					return;
+				}
+				@SuppressWarnings("unchecked")
+				T data = (T) result;
+				onSuccess.accept(data);
+			}
+		});
+	}
+
+	private <T> void runDbAction(Player player, Supplier<T> query, Consumer<T> onSuccess) {
+		AstraAuction plugin = AstraAuction.getInstance();
+		if (plugin == null) {
+			T result = query.get();
+			onSuccess.accept(result);
+			return;
+		}
+		plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new AsyncTask() {
+			@Override
+			public void onRun() {
+				try {
+					setResult(query.get());
+				} catch (Exception e) {
+					setResult(e);
+				}
+			}
+
+			@Override
+			public void onCompletion(Server server) {
+				if (player == null || !player.isOnline()) {
 					return;
 				}
 				Object result = getResult();
@@ -270,13 +314,16 @@ public class AuctionGui {
 
 			bindItem(inventory, player, i, view, clicker -> {
 				if (viewType == ViewType.MY_ITEMS) {
-					boolean ok = auctionService.cancelAuction(clicker, auction.getId());
-					if (ok) {
-						clicker.sendMessage(MessageUtil.success(Lang.t("messages.lot.cancel.ok")));
-					} else {
-						clicker.sendMessage(MessageUtil.error(Lang.t("messages.lot.cancel.fail")));
-					}
-					reopenAfterClose(clicker, inventory, reopen);
+					runDbAction(clicker,
+							() -> auctionService.cancelAuction(clicker, auction.getId()),
+							ok -> {
+								if (ok) {
+									clicker.sendMessage(MessageUtil.success(Lang.t("messages.lot.cancel.ok")));
+								} else {
+									clicker.sendMessage(MessageUtil.error(Lang.t("messages.lot.cancel.fail")));
+								}
+								reopenAfterClose(clicker, inventory, reopen);
+							});
 					return;
 				}
 				if (!auctionService.isEconomyAvailable()) {
@@ -367,18 +414,23 @@ public class AuctionGui {
 
 		inventory.setItem(4, display, cancelHandler());
 		bindItem(inventory, player, 2, yes, clicker -> {
-			AuctionService.BuyResult result = auctionService.buyNowWithResult(clicker, auction.getId());
-			playBuyFeedback(clicker, result == AuctionService.BuyResult.OK);
-			switch (result) {
-				case OK -> clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
-				case NOT_ENOUGH_MONEY -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_enough")));
-				case OWN_LOT -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.own")));
-				case NOT_ACTIVE, NOT_FOUND, CONFLICT ->
-					clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_available")));
-				case ECONOMY_MISSING -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
-				default -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
-			}
-			reopenAfterClose(clicker, inventory, reopen);
+			runDbAction(clicker,
+					() -> auctionService.buyNowWithResult(clicker, auction.getId()),
+					result -> {
+						playBuyFeedback(clicker, result == AuctionService.BuyResult.OK);
+						switch (result) {
+							case OK -> clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
+							case NOT_ENOUGH_MONEY ->
+								clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_enough")));
+							case OWN_LOT -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.own")));
+							case NOT_ACTIVE, NOT_FOUND, CONFLICT ->
+								clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_available")));
+							case ECONOMY_MISSING ->
+								clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
+							default -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
+						}
+						reopenAfterClose(clicker, inventory, reopen);
+					});
 		});
 		bindItem(inventory, player, 6, no, clicker -> {
 			reopenAfterClose(clicker, inventory, reopen);

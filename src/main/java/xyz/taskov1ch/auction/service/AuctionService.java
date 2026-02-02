@@ -297,8 +297,13 @@ public class AuctionService {
 		plugin.getServer().getScheduler().scheduleRepeatingTask(plugin, new Task() {
 			@Override
 			public void onRun(int currentTick) {
-				processExpired();
-				processExpiredClaims();
+				plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new cn.nukkit.scheduler.AsyncTask() {
+					@Override
+					public void onRun() {
+						processExpired();
+						processExpiredClaims();
+					}
+				});
 			}
 		}, 20 * 60);
 	}

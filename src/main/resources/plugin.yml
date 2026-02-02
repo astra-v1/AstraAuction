@@ -1,6 +1,6 @@
 name: AstraAuction
 main: xyz.taskov1ch.auction.AstraAuction
-version: 0.9.23
+version: 0.9.46
 api: ["1.0.0"]
 description: "Auction plugin scaffold for Lumi (Nukkit-MOT fork)"
 author: "Taskov1ch"

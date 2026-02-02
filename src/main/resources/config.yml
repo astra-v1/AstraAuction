@@ -21,8 +21,8 @@ database:
     username: "postgres"
     password: ""
 
-# Language file code (ru, en, ja, zh)
-language: "ru"
+# Language file code (en, ru, ua, ja, zh)
+language: "en"
 
 auction:
   # Lot duration in seconds (default: 48 hours)

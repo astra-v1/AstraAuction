@@ -64,8 +64,4 @@ public class DatabaseProvider {
 	public IDatabase getDatabase() {
 		return database;
 	}
-
-	public void shutdown() {
-		// TODO: Remove or implement proper shutdown if needed
-	}
 }

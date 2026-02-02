@@ -9,6 +9,10 @@ import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.tree.ParamList;
 import cn.nukkit.command.utils.CommandLogger;
 import cn.nukkit.item.Item;
+import cn.nukkit.scheduler.AsyncTask;
+import cn.nukkit.Server;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.Map;
 import xyz.taskov1ch.auction.AstraAuction;
 import xyz.taskov1ch.auction.service.AuctionService;
@@ -101,13 +105,23 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.error(Lang.t("messages.item-in-hand")));
 					return true;
 				}
-				long id = auctionService.createAuction(player, item, price, price);
-				if (id <= 0) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
-					return true;
-				}
-				player.getInventory().setItemInHand(Item.get(0));
-				sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
+				Item itemSnapshot = item.clone();
+				runDbAction(player,
+						() -> auctionService.createAuction(player, itemSnapshot, price, price),
+						id -> {
+							if (id <= 0) {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
+								return;
+							}
+							Item hand = player.getInventory().getItemInHand();
+							if (hand != null
+									&& hand.getId() == itemSnapshot.getId()
+									&& hand.getDamage() == itemSnapshot.getDamage()
+									&& hand.getCount() == itemSnapshot.getCount()) {
+								player.getInventory().setItemInHand(Item.get(0));
+							}
+							sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
+						});
 			}
 			case "view" -> {
 				if (!(sender instanceof Player player)) {
@@ -151,12 +165,15 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_buy")));
 					return true;
 				}
-				boolean ok = auctionService.forceBuy(player, id);
-				if (ok) {
-					sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
-				} else {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
-				}
+				runDbAction(player,
+						() -> auctionService.forceBuy(player, id),
+						ok -> {
+							if (ok) {
+								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
+							} else {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
+							}
+						});
 			}
 			case "force_expire" -> {
 				if (!sender.hasPermission("astraauction.force")) {
@@ -172,12 +189,15 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_expire")));
 					return true;
 				}
-				boolean ok = auctionService.forceExpire(id);
-				if (ok) {
-					sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
-				} else {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
-				}
+				runDbAction(sender,
+						() -> auctionService.forceExpire(id),
+						ok -> {
+							if (ok) {
+								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
+							} else {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
+							}
+						});
 			}
 			case "help" -> sendHelp(sender);
 			default -> sendHelp(sender);
@@ -226,13 +246,23 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.error(Lang.t("messages.item-in-hand")));
 					return 0;
 				}
-				long id = auctionService.createAuction(player, item, price, price);
-				if (id <= 0) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
-					return 0;
-				}
-				player.getInventory().setItemInHand(Item.get(0));
-				sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
+				Item itemSnapshot = item.clone();
+				runDbAction(player,
+						() -> auctionService.createAuction(player, itemSnapshot, price, price),
+						id -> {
+							if (id <= 0) {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
+								return;
+							}
+							Item hand = player.getInventory().getItemInHand();
+							if (hand != null
+									&& hand.getId() == itemSnapshot.getId()
+									&& hand.getDamage() == itemSnapshot.getDamage()
+									&& hand.getCount() == itemSnapshot.getCount()) {
+								player.getInventory().setItemInHand(Item.get(0));
+							}
+							sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
+						});
 				return 1;
 			}
 			case "view" -> {
@@ -269,13 +299,16 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_buy")));
 					return 0;
 				}
-				boolean ok = auctionService.forceBuy(player, id);
-				if (ok) {
-					sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
-				} else {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
-				}
-				return ok ? 1 : 0;
+				runDbAction(player,
+						() -> auctionService.forceBuy(player, id),
+						ok -> {
+							if (ok) {
+								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
+							} else {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
+							}
+						});
+				return 1;
 			}
 			case "force_expire" -> {
 				if (!sender.hasPermission("astraauction.force")) {
@@ -287,13 +320,16 @@ public class AuctionCommand extends Command {
 					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_expire")));
 					return 0;
 				}
-				boolean ok = auctionService.forceExpire(id);
-				if (ok) {
-					sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
-				} else {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
-				}
-				return ok ? 1 : 0;
+				runDbAction(sender,
+						() -> auctionService.forceExpire(id),
+						ok -> {
+							if (ok) {
+								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
+							} else {
+								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
+							}
+						});
+				return 1;
 			}
 			case "help" -> {
 				sendHelp(sender);
@@ -359,5 +395,40 @@ public class AuctionCommand extends Command {
 			return id > 0 ? id : -1;
 		}
 		return parseLong(String.valueOf(value), -1);
+	}
+
+	private <T> void runDbAction(CommandSender sender, Supplier<T> query, Consumer<T> onSuccess) {
+		AstraAuction plugin = this.plugin;
+		if (plugin == null) {
+			T result = query.get();
+			onSuccess.accept(result);
+			return;
+		}
+		plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new AsyncTask() {
+			@Override
+			public void onRun() {
+				try {
+					setResult(query.get());
+				} catch (Exception e) {
+					setResult(e);
+				}
+			}
+
+			@Override
+			public void onCompletion(Server server) {
+				if (sender instanceof Player player && !player.isOnline()) {
+					return;
+				}
+				Object result = getResult();
+				if (result instanceof Exception e) {
+					sender.sendMessage(MessageUtil.error(Lang.t("messages.db.error")));
+					plugin.getLogger().warning("DB query failed: " + e.getMessage());
+					return;
+				}
+				@SuppressWarnings("unchecked")
+				T data = (T) result;
+				onSuccess.accept(data);
+			}
+		});
 	}
 }

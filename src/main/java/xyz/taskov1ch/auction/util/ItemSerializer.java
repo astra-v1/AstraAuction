@@ -5,6 +5,7 @@ import cn.nukkit.nbt.NBTIO;
 import cn.nukkit.nbt.tag.CompoundTag;
 import cn.nukkit.network.protocol.ProtocolInfo;
 
+import java.io.IOException;
 import java.util.Base64;
 
 public final class ItemSerializer {
@@ -16,8 +17,8 @@ public final class ItemSerializer {
 			CompoundTag tag = putItemHelper(item);
 			byte[] bytes = NBTIO.write(tag);
 			return Base64.getEncoder().encodeToString(bytes);
-		} catch (Exception e) {
-			return "";
+		} catch (IOException e) {
+			throw new IllegalStateException("Failed to serialize item", e);
 		}
 	}
 
@@ -31,51 +32,8 @@ public final class ItemSerializer {
 			Item item = NBTIO.getItemHelper(tag);
 			return item == null || item.isNull() ? fallback : item;
 		} catch (Exception e) {
-			return decodeLegacy(data, fallback);
+			return fallback;
 		}
-	}
-
-	private static Item decodeLegacy(String data, Item fallback) {
-		try {
-			if (data.startsWith("v2|")) {
-				String payload = data.substring(3);
-				String[] parts = payload.split("\\|", 4);
-				if (parts.length < 3) {
-					return fallback;
-				}
-				String namespaceId = parts[0];
-				int damage = Integer.parseInt(parts[1]);
-				int count = Integer.parseInt(parts[2]);
-				String tagPart = parts.length >= 4 ? parts[3] : "";
-				Item item = createItem(namespaceId, damage, count);
-				if (item == null || item.isNull()) {
-					return fallback;
-				}
-				if (tagPart != null && !tagPart.isEmpty()) {
-					byte[] bytes = Base64.getDecoder().decode(tagPart);
-					item.setCompoundTag(bytes);
-				}
-				return item;
-			}
-			if (data.contains(":")) {
-				String[] parts = data.split(":", 4);
-				if (parts.length < 4) {
-					return fallback;
-				}
-				int id = Integer.parseInt(parts[0]);
-				int damage = Integer.parseInt(parts[1]);
-				int count = Integer.parseInt(parts[2]);
-				Item item = Item.get(id, damage, count);
-				if (parts[3] != null && !parts[3].isEmpty()) {
-					byte[] bytes = Base64.getDecoder().decode(parts[3]);
-					CompoundTag tag = NBTIO.read(bytes);
-					item.setNamedTag(tag);
-				}
-				return item;
-			}
-		} catch (Exception ignored) {
-		}
-		return fallback;
 	}
 
 	private static CompoundTag putItemHelper(Item item) {
@@ -97,18 +55,4 @@ public final class ItemSerializer {
 		return NBTIO.putItemHelper(item);
 	}
 
-	private static Item createItem(String namespaceId, int damage, int count) {
-		try {
-			int id = Integer.parseInt(namespaceId);
-			return Item.get(id, damage, count);
-		} catch (Exception ignored) {
-		}
-		Item item = Item.fromString(namespaceId);
-		if (item == null || item.isNull()) {
-			return item;
-		}
-		item.setDamage(damage);
-		item.setCount(count);
-		return item;
-	}
 }

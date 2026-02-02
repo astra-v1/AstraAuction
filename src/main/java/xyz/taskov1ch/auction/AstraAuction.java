@@ -35,13 +35,6 @@ public class AstraAuction extends PluginBase {
 		getServer().getCommandMap().register("astraauction", new AuctionCommand(this, auctionService));
 	}
 
-	@Override
-	public void onDisable() {
-		if (databaseProvider != null) {
-			databaseProvider.shutdown();
-		}
-	}
-
 	public static AstraAuction getInstance() {
 		return instance;
 	}

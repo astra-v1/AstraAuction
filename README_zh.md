@@ -55,7 +55,7 @@ AstraAuction 是 [Lumi](https://github.com/koshakminedev/lumi) 的玩家间交�
 | 参数 | 说明 | 默认值 |
 |---|---|---|
 | `database.type` | 数据库类型: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | 消息语言 | `ru` |
+| `language` | 消息语言 | `en` |
 | `auction.duration-seconds` | 上架时长（秒） | `172800` (48h) |
 | `auction.tax-percent` | 交易手续费（%） | `10.0` |
 | `auction.max-slots` | 最大同时上架数（0 = 不限） | `6` |
@@ -67,7 +67,7 @@ AstraAuction 是 [Lumi](https://github.com/koshakminedev/lumi) 的玩家间交�
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — 购买与结算必需。
 - **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — GUI 必需。
 - **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — 基于 JOOQ ORM 的数据库支持。
-- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 支持动态语言加载的本地化引擎。
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — 支持动态语言加载的本地化引擎（已内置）。
 
 ## 从源码构建 🔨
 1. 安装 **[JDK 21+](https://www.google.com/search?q=jdk+21)**。
