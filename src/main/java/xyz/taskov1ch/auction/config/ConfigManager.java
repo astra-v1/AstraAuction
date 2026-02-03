@@ -62,8 +62,12 @@ public class ConfigManager {
 		return config.getString("database.postgres.password", "");
 	}
 
-	public String getLanguage() {
-		return config.getString("language", "ru");
+	public String getLanguageMode() {
+		return config.getString("language.value", "eng");
+	}
+
+	public String getDefaultLanguage() {
+		return config.getString("language.default", "eng");
 	}
 
 	public int getAuctionDurationSeconds() {
@@ -72,6 +76,10 @@ public class ConfigManager {
 
 	public double getAuctionTaxPercent() {
 		return config.getDouble("auction.tax-percent", 10.0);
+	}
+
+	public boolean isRoundPrices() {
+		return config.getBoolean("auction.round-prices", false);
 	}
 
 	public int getMaxSlots() {
@@ -88,5 +96,9 @@ public class ConfigManager {
 
 	public String getGuiSortDefault() {
 		return config.getString("auction.gui.sort-default", "price_asc");
+	}
+
+	public int getGuiOpenDelayTicks() {
+		return config.getInt("auction.gui.open-delay-ticks", 10);
 	}
 }

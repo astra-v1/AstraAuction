@@ -7,8 +7,8 @@ import cn.nukkit.scheduler.Task;
 import java.util.List;
 import java.util.UUID;
 import xyz.taskov1ch.auction.config.ConfigManager;
-import xyz.taskov1ch.auction.database.AuctionRepository;
-import xyz.taskov1ch.auction.database.DatabaseProvider;
+import xyz.taskov1ch.auction.repository.AuctionRepository;
+import xyz.taskov1ch.auction.repository.DatabaseProvider;
 import xyz.taskov1ch.auction.economy.EconomyHook;
 import xyz.taskov1ch.auction.model.AuctionClaim;
 import xyz.taskov1ch.auction.model.AuctionItem;
@@ -45,30 +45,34 @@ public class AuctionService {
 	}
 
 	public long createAuction(Player seller, Item item, double startPrice, Double buyoutPrice) {
-		try {
-			long now = System.currentTimeMillis();
-			long endAt = now + (configManager.getAuctionDurationSeconds() * 1000L);
-			String sellerUuid = seller.getUniqueId().toString();
-			int maxSlots = configManager.getMaxSlots();
-			if (maxSlots > 0 && repository.countActiveBySeller(sellerUuid) >= maxSlots) {
-				return -1;
-			}
-			AuctionItem auction = new AuctionItem();
-			auction.setSellerUuid(sellerUuid);
-			auction.setSellerName(seller.getName());
-			auction.setItemNbt(ItemSerializer.toBase64(item));
-			auction.setItemName(getItemDisplayName(item));
-			auction.setStartPrice(startPrice);
-			auction.setCurrentPrice(startPrice);
-			auction.setBuyoutPrice(buyoutPrice);
-			auction.setStatus(AuctionStatus.ACTIVE.name());
-			auction.setCreatedAt(now);
-			auction.setEndAt(endAt);
-			return repository.createAuction(auction);
-		} catch (Exception e) {
-			plugin.getLogger().warning("Create auction failed: " + e.getMessage());
+		long now = System.currentTimeMillis();
+		long endAt = now + (configManager.getAuctionDurationSeconds() * 1000L);
+		String sellerUuid = seller.getUniqueId().toString();
+		int maxSlots = configManager.getMaxSlots();
+		if (maxSlots > 0 && repository.countActiveBySeller(sellerUuid) >= maxSlots) {
 			return -1;
 		}
+		double normalizedStart = normalizePrice(startPrice);
+		Double normalizedBuyout = buyoutPrice == null ? null : normalizePrice(buyoutPrice);
+		AuctionItem auction = new AuctionItem();
+		auction.setSellerUuid(sellerUuid);
+		auction.setSellerName(seller.getName());
+		auction.setItemNbt(ItemSerializer.toBase64(item));
+		auction.setItemName(getItemDisplayName(item));
+		auction.setStartPrice(normalizedStart);
+		auction.setCurrentPrice(normalizedStart);
+		auction.setBuyoutPrice(normalizedBuyout);
+		auction.setStatus(AuctionStatus.ACTIVE.name());
+		auction.setCreatedAt(now);
+		auction.setEndAt(endAt);
+		return repository.createAuction(auction);
+	}
+
+	public double normalizePrice(double price) {
+		if (!configManager.isRoundPrices()) {
+			return price;
+		}
+		return Math.floor(price);
 	}
 
 	public AuctionItem getAuction(long id) {
@@ -297,8 +301,13 @@ public class AuctionService {
 		plugin.getServer().getScheduler().scheduleRepeatingTask(plugin, new Task() {
 			@Override
 			public void onRun(int currentTick) {
-				processExpired();
-				processExpiredClaims();
+				plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new cn.nukkit.scheduler.AsyncTask() {
+					@Override
+					public void onRun() {
+						processExpired();
+						processExpiredClaims();
+					}
+				});
 			}
 		}, 20 * 60);
 	}

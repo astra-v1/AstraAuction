@@ -28,7 +28,6 @@ import xyz.taskov1ch.auction.util.Lang;
 import xyz.taskov1ch.auction.util.MessageUtil;
 
 public class AuctionGui {
-	private static final int GUI_OPEN_DELAY_TICKS = 10;
 	private static final String LANG_DB_STAY_STILL = "messages.db.stay_still";
 	private static final String LANG_DB_FETCHING = "messages.db.fetching";
 	private static final String LANG_DB_CANCEL_MOVED = "messages.db.cancel_moved";
@@ -55,7 +54,7 @@ public class AuctionGui {
 		int safePage = Math.max(1, page);
 		runDbQuery(player,
 				() -> auctionService.listActive(safePage, pageSize, sortMode),
-				items -> openMarket(player, safePage, TextFormat.GOLD + Lang.t("gui.market.title"), items, pageSize,
+				items -> openMarket(player, safePage, TextFormat.GOLD + t(player, "gui.market.title"), items, pageSize,
 						() -> openMain(player, safePage), sortMode, null, ViewType.MAIN));
 	}
 
@@ -66,7 +65,7 @@ public class AuctionGui {
 		AuctionSortMode sortMode = getSortMode(player);
 		int pageSize = getPageSize();
 		int safePage = Math.max(1, page);
-		String title = TextFormat.GOLD + Lang.t("gui.view.title", "player", sellerName);
+		String title = TextFormat.GOLD + t(player, "gui.view.title", "player", sellerName);
 		runDbQuery(player,
 				() -> auctionService.listActiveBySellerName(sellerName, safePage, pageSize, sortMode),
 				items -> openMarket(player, safePage, title, items, pageSize,
@@ -81,7 +80,7 @@ public class AuctionGui {
 		AuctionSortMode sortMode = getSortMode(player);
 		int pageSize = getPageSize();
 		int safePage = Math.max(1, page);
-		String title = TextFormat.GOLD + Lang.t("gui.search.title", "query", keyword);
+		String title = TextFormat.GOLD + t(player, "gui.search.title", "query", keyword);
 		runDbQuery(player,
 				() -> auctionService.searchActive(keyword, safePage, pageSize, sortMode),
 				items -> openMarket(player, safePage, title, items, pageSize,
@@ -94,7 +93,7 @@ public class AuctionGui {
 		}
 		int pageSize = getPageSize();
 		int safePage = Math.max(1, page);
-		String title = TextFormat.GOLD + Lang.t("gui.my.title");
+		String title = TextFormat.GOLD + t(player, "gui.my.title");
 		String sellerUuid = player.getUniqueId().toString();
 		runDbQuery(player,
 				() -> auctionService.listActiveBySeller(sellerUuid, safePage, pageSize),
@@ -126,21 +125,26 @@ public class AuctionGui {
 						return;
 					}
 					FakeInventory inventory = new FakeInventory(InventoryType.DOUBLE_CHEST,
-							TextFormat.GOLD + Lang.t("gui.claims.title") + TextFormat.RESET + " | "
-									+ Lang.t("gui.page", "page", pageNumber));
+							TextFormat.GOLD + t(player, "gui.claims.title") + TextFormat.RESET + " | "
+									+ t(player, "gui.page", "page", pageNumber));
 					inventory.setDefaultItemHandler(cancelHandler());
 					int slot = 0;
 					for (AuctionClaim claim : claims) {
-						Item view = buildClaimItem(claim);
+						Item view = buildClaimItem(player, claim);
 						int claimSlot = slot;
 						bindItem(inventory, player, claimSlot, view, clicker -> {
-							boolean ok = auctionService.claimSingle(clicker, claim.getId());
-							if (ok) {
-								clicker.sendMessage(MessageUtil.success(Lang.t("messages.claim.single.ok")));
-							} else {
-								clicker.sendMessage(MessageUtil.error(Lang.t("messages.claim.single.fail")));
-							}
-							reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+							runDbAction(clicker,
+									() -> auctionService.claimSingle(clicker, claim.getId()),
+									ok -> {
+										if (ok) {
+											clicker.sendMessage(
+													MessageUtil.success(t(clicker, "messages.claim.single.ok")));
+										} else {
+											clicker.sendMessage(
+													MessageUtil.error(t(clicker, "messages.claim.single.fail")));
+										}
+										reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+									});
 						});
 						slot++;
 					}
@@ -150,15 +154,19 @@ public class AuctionGui {
 							() -> openClaims(player, pageNumber - 1),
 							() -> player.removeWindow(inventory),
 							() -> openClaims(player, pageNumber + 1));
-					bindItem(inventory, player, 48, navItem(54, Lang.t("gui.nav.claim_all")), clicker -> {
-						int count = auctionService.claim(clicker);
-						clicker.sendMessage(MessageUtil.success(Lang.t("messages.claim.received", "count", count)));
-						reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+					bindItem(inventory, player, 48, navItem(54, t(player, "gui.nav.claim_all")), clicker -> {
+						runDbAction(clicker,
+								() -> auctionService.claim(clicker),
+								count -> {
+									clicker.sendMessage(MessageUtil.success(
+											t(clicker, "messages.claim.received", "count", count)));
+									reopenAfterClose(clicker, inventory, () -> openClaims(clicker, pageNumber));
+								});
 					});
-					bindItem(inventory, player, 47, navItem(54, Lang.t("gui.nav.my_items")), clicker -> {
+					bindItem(inventory, player, 47, navItem(54, t(player, "gui.nav.my_items")), clicker -> {
 						reopenAfterClose(clicker, inventory, () -> openMyItems(clicker, 1));
 					});
-					bindItem(inventory, player, 51, navItem(54, Lang.t("gui.nav.market")), clicker -> {
+					bindItem(inventory, player, 51, navItem(54, t(player, "gui.nav.market")), clicker -> {
 						reopenAfterClose(clicker, inventory, () -> openMain(clicker, 1));
 					});
 
@@ -177,7 +185,7 @@ public class AuctionGui {
 		long now = System.currentTimeMillis();
 		Long lastNotice = dbNoticeByPlayer.get(player.getUniqueId());
 		if (lastNotice == null || now - lastNotice > 3000) {
-			MessageUtil.title(player, Lang.t(LANG_DB_STAY_STILL), Lang.t(LANG_DB_FETCHING));
+			MessageUtil.title(player, t(player, LANG_DB_STAY_STILL), t(player, LANG_DB_FETCHING));
 			dbNoticeByPlayer.put(player.getUniqueId(), now);
 		}
 		plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new AsyncTask() {
@@ -196,12 +204,47 @@ public class AuctionGui {
 					return;
 				}
 				if (hasMoved(player, start)) {
-					player.sendMessage(MessageUtil.error(Lang.t(LANG_DB_CANCEL_MOVED)));
+					player.sendMessage(MessageUtil.error(t(player, LANG_DB_CANCEL_MOVED)));
 					return;
 				}
 				Object result = getResult();
 				if (result instanceof Exception e) {
-					player.sendMessage(MessageUtil.error(Lang.t(LANG_DB_ERROR)));
+					player.sendMessage(MessageUtil.error(t(player, LANG_DB_ERROR)));
+					plugin.getLogger().warning("DB query failed: " + e.getMessage());
+					return;
+				}
+				@SuppressWarnings("unchecked")
+				T data = (T) result;
+				onSuccess.accept(data);
+			}
+		});
+	}
+
+	private <T> void runDbAction(Player player, Supplier<T> query, Consumer<T> onSuccess) {
+		AstraAuction plugin = AstraAuction.getInstance();
+		if (plugin == null) {
+			T result = query.get();
+			onSuccess.accept(result);
+			return;
+		}
+		plugin.getServer().getScheduler().scheduleAsyncTask(plugin, new AsyncTask() {
+			@Override
+			public void onRun() {
+				try {
+					setResult(query.get());
+				} catch (Exception e) {
+					setResult(e);
+				}
+			}
+
+			@Override
+			public void onCompletion(Server server) {
+				if (player == null || !player.isOnline()) {
+					return;
+				}
+				Object result = getResult();
+				if (result instanceof Exception e) {
+					player.sendMessage(MessageUtil.error(t(player, LANG_DB_ERROR)));
 					plugin.getLogger().warning("DB query failed: " + e.getMessage());
 					return;
 				}
@@ -236,7 +279,7 @@ public class AuctionGui {
 		}
 		if (plugin.getServer().getPluginManager().getPlugin("FakeInventories") == null
 				|| !plugin.getServer().getPluginManager().getPlugin("FakeInventories").isEnabled()) {
-			player.sendMessage(MessageUtil.error(Lang.t("messages.gui.unavailable")));
+			player.sendMessage(MessageUtil.error(t(player, "messages.gui.unavailable")));
 			return false;
 		}
 		return true;
@@ -251,7 +294,7 @@ public class AuctionGui {
 	private void openMarket(Player player, int page, String title, List<AuctionItem> items, int pageSize,
 			Runnable reopen, AuctionSortMode sortMode, String filter, ViewType viewType) {
 		FakeInventory inventory = new FakeInventory(InventoryType.DOUBLE_CHEST,
-				title + TextFormat.RESET + " | " + Lang.t("gui.page", "page", page));
+				title + TextFormat.RESET + " | " + t(player, "gui.page", "page", page));
 		inventory.setDefaultItemHandler(cancelHandler());
 
 		for (int i = 0; i < items.size() && i < pageSize; i++) {
@@ -260,27 +303,30 @@ public class AuctionGui {
 			String itemName = view.getName();
 			view.setCustomName(TextFormat.YELLOW + itemName);
 			view.setLore(new String[] {
-					TextFormat.GRAY + Lang.t("gui.lore.seller", "seller", safeValue(auction.getSellerName())),
-					TextFormat.GRAY + Lang.t("gui.lore.price", "price", auction.getCurrentPrice()),
-					TextFormat.GRAY + Lang.t("gui.lore.remaining", "time",
-							formatDuration(auction.getEndAt() - System.currentTimeMillis())),
-					TextFormat.DARK_GRAY + Lang.t("gui.lore.id", "id", auction.getId()),
-					TextFormat.DARK_GRAY + Lang.t("gui.lore.shift_hint")
+					TextFormat.GRAY
+							+ t(player, "gui.lore.seller", "seller", safeValue(player, auction.getSellerName())),
+					TextFormat.GRAY + t(player, "gui.lore.price", "price", auction.getCurrentPrice()),
+					TextFormat.GRAY + t(player, "gui.lore.remaining", "time",
+							formatDuration(player, auction.getEndAt() - System.currentTimeMillis())),
+					TextFormat.DARK_GRAY + t(player, "gui.lore.id", "id", auction.getId()),
 			});
 
 			bindItem(inventory, player, i, view, clicker -> {
 				if (viewType == ViewType.MY_ITEMS) {
-					boolean ok = auctionService.cancelAuction(clicker, auction.getId());
-					if (ok) {
-						clicker.sendMessage(MessageUtil.success(Lang.t("messages.lot.cancel.ok")));
-					} else {
-						clicker.sendMessage(MessageUtil.error(Lang.t("messages.lot.cancel.fail")));
-					}
-					reopenAfterClose(clicker, inventory, reopen);
+					runDbAction(clicker,
+							() -> auctionService.cancelAuction(clicker, auction.getId()),
+							ok -> {
+								if (ok) {
+									clicker.sendMessage(MessageUtil.success(t(clicker, "messages.lot.cancel.ok")));
+								} else {
+									clicker.sendMessage(MessageUtil.error(t(clicker, "messages.lot.cancel.fail")));
+								}
+								reopenAfterClose(clicker, inventory, reopen);
+							});
 					return;
 				}
 				if (!auctionService.isEconomyAvailable()) {
-					clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
+					clicker.sendMessage(MessageUtil.error(t(clicker, "messages.economy.missing")));
 					return;
 				}
 				reopenAfterClose(clicker, inventory, () -> openConfirmBuy(clicker, auction, reopen));
@@ -297,23 +343,23 @@ public class AuctionGui {
 				});
 
 		bindItem(inventory, player, 46, navItem(399,
-				sortMode == AuctionSortMode.PRICE_ASC ? Lang.t("gui.sort.price_asc_selected")
-						: Lang.t("gui.sort.price_asc")),
+				sortMode == AuctionSortMode.PRICE_ASC ? t(player, "gui.sort.price_asc_selected")
+						: t(player, "gui.sort.price_asc")),
 				clicker -> {
 					setSortMode(clicker, AuctionSortMode.PRICE_ASC);
 					reopenAfterClose(clicker, inventory, reopen);
 				});
 		bindItem(inventory, player, 52, navItem(399,
-				sortMode == AuctionSortMode.PRICE_DESC ? Lang.t("gui.sort.price_desc_selected")
-						: Lang.t("gui.sort.price_desc")),
+				sortMode == AuctionSortMode.PRICE_DESC ? t(player, "gui.sort.price_desc_selected")
+						: t(player, "gui.sort.price_desc")),
 				clicker -> {
 					setSortMode(clicker, AuctionSortMode.PRICE_DESC);
 					reopenAfterClose(clicker, inventory, reopen);
 				});
-		bindItem(inventory, player, 47, navItem(54, Lang.t("gui.nav.my_items")), clicker -> {
+		bindItem(inventory, player, 47, navItem(54, t(player, "gui.nav.my_items")), clicker -> {
 			reopenAfterClose(clicker, inventory, () -> openMyItems(clicker, 1));
 		});
-		bindItem(inventory, player, 51, navItem(394, Lang.t("gui.nav.claims")), clicker -> {
+		bindItem(inventory, player, 51, navItem(394, t(player, "gui.nav.claims")), clicker -> {
 			reopenAfterClose(clicker, inventory, () -> openClaims(clicker, 1));
 		});
 
@@ -335,13 +381,13 @@ public class AuctionGui {
 
 	private void addBottomBar(FakeInventory inventory, Player player, int page, boolean hasNext, Runnable prev,
 			Runnable close, Runnable next) {
-		bindItem(inventory, player, 45, navItem(262, Lang.t("gui.nav.back")), clicker -> {
+		bindItem(inventory, player, 45, navItem(262, t(player, "gui.nav.back")), clicker -> {
 			if (page > 1) {
 				prev.run();
 			}
 		});
-		bindItem(inventory, player, 49, navItem(331, Lang.t("gui.nav.close")), clicker -> close.run());
-		bindItem(inventory, player, 53, navItem(262, Lang.t("gui.nav.next")), clicker -> {
+		bindItem(inventory, player, 49, navItem(331, t(player, "gui.nav.close")), clicker -> close.run());
+		bindItem(inventory, player, 53, navItem(262, t(player, "gui.nav.next")), clicker -> {
 			if (hasNext) {
 				next.run();
 			}
@@ -350,35 +396,40 @@ public class AuctionGui {
 
 	private void openConfirmBuy(Player player, AuctionItem auction, Runnable reopen) {
 		FakeInventory inventory = new FakeInventory(InventoryType.CHEST,
-				TextFormat.GOLD + Lang.t("gui.confirm.title"));
+				TextFormat.GOLD + t(player, "gui.confirm.title"));
 		inventory.setDefaultItemHandler(cancelHandler());
 
 		Item display = ItemSerializer.fromBase64(auction.getItemNbt(), Item.get(0));
 		display.setCustomName(TextFormat.YELLOW + display.getName());
 		display.setLore(new String[] {
-				TextFormat.GRAY + Lang.t("gui.lore.price", "price", auction.getCurrentPrice()),
-				TextFormat.GRAY + Lang.t("gui.lore.seller", "seller", safeValue(auction.getSellerName()))
+				TextFormat.GRAY + t(player, "gui.lore.price", "price", auction.getCurrentPrice()),
+				TextFormat.GRAY + t(player, "gui.lore.seller", "seller", safeValue(player, auction.getSellerName()))
 		});
 
 		Item yes = Item.get(35, 5, 1);
-		yes.setCustomName(TextFormat.GREEN + Lang.t("gui.confirm.buy", "price", auction.getCurrentPrice()));
+		yes.setCustomName(TextFormat.GREEN + t(player, "gui.confirm.buy", "price", auction.getCurrentPrice()));
 		Item no = Item.get(35, 14, 1);
-		no.setCustomName(TextFormat.RED + Lang.t("gui.confirm.cancel"));
+		no.setCustomName(TextFormat.RED + t(player, "gui.confirm.cancel"));
 
 		inventory.setItem(4, display, cancelHandler());
 		bindItem(inventory, player, 2, yes, clicker -> {
-			AuctionService.BuyResult result = auctionService.buyNowWithResult(clicker, auction.getId());
-			playBuyFeedback(clicker, result == AuctionService.BuyResult.OK);
-			switch (result) {
-				case OK -> clicker.sendMessage(MessageUtil.success(Lang.t("messages.buy.ok")));
-				case NOT_ENOUGH_MONEY -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_enough")));
-				case OWN_LOT -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.own")));
-				case NOT_ACTIVE, NOT_FOUND, CONFLICT ->
-					clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.not_available")));
-				case ECONOMY_MISSING -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.economy.missing")));
-				default -> clicker.sendMessage(MessageUtil.error(Lang.t("messages.buy.fail")));
-			}
-			reopenAfterClose(clicker, inventory, reopen);
+			runDbAction(clicker,
+					() -> auctionService.buyNowWithResult(clicker, auction.getId()),
+					result -> {
+						playBuyFeedback(clicker, result == AuctionService.BuyResult.OK);
+						switch (result) {
+							case OK -> clicker.sendMessage(MessageUtil.success(t(clicker, "messages.buy.ok")));
+							case NOT_ENOUGH_MONEY ->
+								clicker.sendMessage(MessageUtil.error(t(clicker, "messages.buy.not_enough")));
+							case OWN_LOT -> clicker.sendMessage(MessageUtil.error(t(clicker, "messages.buy.own")));
+							case NOT_ACTIVE, NOT_FOUND, CONFLICT ->
+								clicker.sendMessage(MessageUtil.error(t(clicker, "messages.buy.not_available")));
+							case ECONOMY_MISSING ->
+								clicker.sendMessage(MessageUtil.error(t(clicker, "messages.economy.missing")));
+							default -> clicker.sendMessage(MessageUtil.error(t(clicker, "messages.buy.fail")));
+						}
+						reopenAfterClose(clicker, inventory, reopen);
+					});
 		});
 		bindItem(inventory, player, 6, no, clicker -> {
 			reopenAfterClose(clicker, inventory, reopen);
@@ -411,7 +462,7 @@ public class AuctionGui {
 			}
 			trackClickContext(player, inventory);
 			player.addWindow(inventory);
-		}, GUI_OPEN_DELAY_TICKS);
+		}, configManager.getGuiOpenDelayTicks());
 	}
 
 	private void trackClickContext(Player player, FakeInventory inventory) {
@@ -487,17 +538,17 @@ public class AuctionGui {
 		return context != null && context.inventory == inventory;
 	}
 
-	private Item buildClaimItem(AuctionClaim claim) {
+	private Item buildClaimItem(Player player, AuctionClaim claim) {
 		if (claim.getItemNbt() != null && !claim.getItemNbt().isEmpty()) {
 			Item item = ItemSerializer.fromBase64(claim.getItemNbt(), Item.get(0));
 			item.setCustomName(TextFormat.YELLOW + item.getName());
-			item.setLore(new String[] { TextFormat.GRAY + Lang.t("gui.claim.take") });
+			item.setLore(new String[] { TextFormat.GRAY + t(player, "gui.claim.take") });
 			return item;
 		}
 		Item money = Item.get(371, 0, 1);
-		money.setCustomName(TextFormat.GOLD + Lang.t("gui.claim.money"));
-		money.setLore(new String[] { TextFormat.GRAY + Lang.t("gui.claim.amount", "amount", claim.getMoney()),
-				TextFormat.GRAY + Lang.t("gui.claim.take") });
+		money.setCustomName(TextFormat.GOLD + t(player, "gui.claim.money"));
+		money.setLore(new String[] { TextFormat.GRAY + t(player, "gui.claim.amount", "amount", claim.getMoney()),
+				TextFormat.GRAY + t(player, "gui.claim.take") });
 		return money;
 	}
 
@@ -515,7 +566,7 @@ public class AuctionGui {
 		return Math.min(45, Math.max(9, size));
 	}
 
-	private String formatDuration(long millis) {
+	private String formatDuration(Player player, long millis) {
 		long seconds = Math.max(0, millis / 1000L);
 		long days = seconds / 86400;
 		seconds %= 86400;
@@ -523,16 +574,20 @@ public class AuctionGui {
 		seconds %= 3600;
 		long minutes = seconds / 60;
 		if (days > 0) {
-			return Lang.t("time.days_hours", "days", days, "hours", hours);
+			return t(player, "time.days_hours", "days", days, "hours", hours);
 		}
 		if (hours > 0) {
-			return Lang.t("time.hours_minutes", "hours", hours, "minutes", minutes);
+			return t(player, "time.hours_minutes", "hours", hours, "minutes", minutes);
 		}
-		return Lang.t("time.minutes", "minutes", minutes);
+		return t(player, "time.minutes", "minutes", minutes);
 	}
 
-	private String safeValue(String value) {
-		return value == null || value.isEmpty() ? Lang.t("time.empty") : value;
+	private String safeValue(Player player, String value) {
+		return value == null || value.isEmpty() ? t(player, "time.empty") : value;
+	}
+
+	private String t(Player player, String key, Object... placeholders) {
+		return Lang.t(player, key, placeholders);
 	}
 
 	private enum ViewType {

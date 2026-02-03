@@ -1,12 +1,17 @@
-package xyz.taskov1ch.auction.database;
+package xyz.taskov1ch.auction.repository;
 
 import cn.nukkit.plugin.PluginBase;
+import com.mefrreex.jooq.JOOQConnector;
+import com.mefrreex.jooq.database.IDatabase;
+import com.mefrreex.jooq.database.MySQLDatabase;
+import com.mefrreex.jooq.database.SQLiteDatabase;
+import java.io.File;
 import xyz.taskov1ch.auction.config.ConfigManager;
 
 public class DatabaseProvider {
 	private final PluginBase plugin;
 	private final ConfigManager configManager;
-	private AuctionDatabase database;
+	private IDatabase database;
 	private String type;
 
 	public DatabaseProvider(PluginBase plugin, ConfigManager configManager) {
@@ -15,6 +20,7 @@ public class DatabaseProvider {
 	}
 
 	public void init() {
+		JOOQConnector.setJOOQMessagesEnabled(false);
 		String type = configManager.getDatabaseType();
 		this.type = type;
 		switch (type) {
@@ -22,25 +28,20 @@ public class DatabaseProvider {
 				String host = configManager.getMySqlHost();
 				int port = configManager.getMySqlPort();
 				String hostWithPort = host != null && host.contains(":") ? host : host + ":" + port;
-				database = new AuctionMySQLDatabase(
+				database = new MySQLDatabase(
 						hostWithPort,
 						configManager.getMySqlDatabase(),
 						configManager.getMySqlUsername(),
 						configManager.getMySqlPassword());
 			}
-			case "postgres", "postgresql" -> {
-				String host = configManager.getPostgresHost();
-				int port = configManager.getPostgresPort();
-				String hostWithPort = host != null && host.contains(":") ? host : host + ":" + port;
-				database = new AuctionPostgreSQLDatabase(
-						hostWithPort,
-						configManager.getPostgresDatabase(),
-						configManager.getPostgresUsername(),
-						configManager.getPostgresPassword());
+			default -> {
+				File sqliteFolder = new File(plugin.getDataFolder(), configManager.getSqliteFolder());
+				if (!sqliteFolder.exists()) {
+					sqliteFolder.mkdirs();
+				}
+				File sqliteFile = new File(sqliteFolder, configManager.getSqliteDatabase() + ".db");
+				database = new SQLiteDatabase(sqliteFile);
 			}
-			default -> database = new AuctionSQLiteDatabase(
-					configManager.getSqliteFolder(),
-					configManager.getSqliteDatabase());
 		}
 
 		plugin.getLogger().info("Database initialized: " + type);
@@ -50,17 +51,7 @@ public class DatabaseProvider {
 		return type == null ? "sqlite" : type;
 	}
 
-	public AuctionDatabase getDatabase() {
+	public IDatabase getDatabase() {
 		return database;
-	}
-
-	public void shutdown() {
-		if (database instanceof AutoCloseable) {
-			try {
-				((AutoCloseable) database).close();
-			} catch (Exception e) {
-				plugin.getLogger().warning("Failed to close database: " + e.getMessage());
-			}
-		}
 	}
 }

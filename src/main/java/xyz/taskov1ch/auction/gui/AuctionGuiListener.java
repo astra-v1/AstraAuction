@@ -37,4 +37,5 @@ public class AuctionGuiListener implements Listener {
 		}
 		auctionGui.handleClose(event.getPlayer(), fakeInventory);
 	}
+
 }

@@ -4,7 +4,7 @@
 # 💫 AstraAuction β
 **Market (Auction) plugin for [Lumi](https://github.com/koshakminedev/lumi).**
 
-**EN** | **[RU](README_ru.md)** | **[UA](README_ua.md)** | **[JA](README_ja.md)** | **[ZH](README_zh.md)**
+**EN** | **[RU](README_ru.md)** | **[UA](README_ua.md)** | **[JA](README_ja.md)**
 
 </div>
 
@@ -20,8 +20,8 @@ The plugin preserves full item NBT, stores data in a database, and provides a cl
 - **GUI market** — buying, confirmation dialogs, and page navigation.
 - **Sorting and search** — sort by price and search by item name.
 - **Manage your lots** — view and cancel active lots via GUI.
-- **Flexible database support** — SQLite / MySQL / PostgreSQL.
-- **Localization** — built-in support for `ru`, `en`, `ua`, `ja`, `zh`, with the ability to add custom languages.
+- **Flexible database support** — SQLite / MySQL.
+- **Localization** — built-in support for `eng`, `rus`, `ukr`, `jpn`, with the ability to add custom languages.
 
 ## Screenshots 🖼️
 | **Main market page** | **My lots page** |
@@ -54,19 +54,23 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 
 | Parameter | Description | Default |
 |---|---|---|
-| `database.type` | Database type: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | Message language | `ru` |
+| `database.type` | Database type: `sqlite` / `mysql` | `sqlite` |
+| `language.value` | Language mode: `eng` / `rus` / `ukr` / `jpn` / `autodetect` / `server` | `autodetect` |
+| `language.default` | Default language | `eng` |
 | `auction.duration-seconds` | Lot lifetime (seconds) | `172800` (48h) |
 | `auction.tax-percent` | Transaction fee (%) | `10.0` |
+| `auction.round-prices` | Round prices to whole numbers | `false` |
 | `auction.max-slots` | Max active lots (0 = unlimited) | `6` |
 | `auction.claim-expire-seconds` | Claims storage duration (seconds) | `604800` (7d) |
 | `auction.gui.page-size` | GUI page size (up to 45) | `45` |
+| `auction.gui.open-delay-ticks` | GUI open delay (ticks) | `10` |
 | `auction.gui.sort-default` | Default sorting | `price_asc` |
 
 ## Dependencies 🔌
 - **[EconomyAPI](https://cloudburstmc.org/resources/economyapi.14/)** — required for purchases and payouts.
-- **[FakeInventories](https://github.com/JkqzDev/FakeInventories-MOT)** — required for GUI support.
-- **[sql2o-nukkit](https://github.com/hteppl/sql2o-nukkit)** *(formerly **[DataManager](https://cloudburstmc.org/resources/datamanager.892/)**)* — required for database support.
+- **[FakeInventories](https://github.com/LuminiaDev/FakeInventories)** — required for GUI support.
+- **[JOOQConnector](https://github.com/MEFRREEX/JOOQConnector)** — database support via JOOQ ORM.
+- **[Polyglot](https://github.com/DensyDev/Polyglot)** — localization engine for dynamic language loading (shaded).
 
 ## Building from Source 🔨
 1. Install **[JDK 21+](https://www.google.com/search?q=jdk+21)**.
