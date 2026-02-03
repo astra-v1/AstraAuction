@@ -3,7 +3,6 @@ package xyz.taskov1ch.auction.command;
 import cn.nukkit.Player;
 import cn.nukkit.command.Command;
 import cn.nukkit.command.CommandSender;
-import cn.nukkit.command.data.CommandEnum;
 import cn.nukkit.command.data.CommandParamType;
 import cn.nukkit.command.data.CommandParameter;
 import cn.nukkit.command.tree.ParamList;
@@ -24,186 +23,42 @@ public class AuctionCommand extends Command {
 	private final AuctionService auctionService;
 
 	public AuctionCommand(AstraAuction plugin, AuctionService auctionService) {
-		super("ah", "Auction commands", "/ah help", new String[] { "auction", "auc" });
+		super("ah", Lang.t("messages.command.description"), "/ah help", new String[] { "auction", "auc" });
 		this.plugin = plugin;
 		this.auctionService = auctionService;
 		this.setPermission("astraauction.use");
 		this.commandParameters.clear();
 		addCommandParameters("default", new CommandParameter[] {});
 		addCommandParameters("open", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionOpen", "open", "gui")),
+				CommandParameter.newEnum("action", false, new String[] { "open" }),
 				CommandParameter.newType("page", true, CommandParamType.INT)
 		});
 		addCommandParameters("sell", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionSell", "sell")),
+				CommandParameter.newEnum("action", false, new String[] { "sell" }),
 				CommandParameter.newType("price", false, CommandParamType.FLOAT)
 		});
 		addCommandParameters("view", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionView", "view")),
+				CommandParameter.newEnum("action", false, new String[] { "view" }),
 				CommandParameter.newType("player", false, CommandParamType.STRING),
 				CommandParameter.newType("page", true, CommandParamType.INT)
 		});
 		addCommandParameters("search", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionSearch", "search")),
+				CommandParameter.newEnum("action", false, new String[] { "search" }),
 				CommandParameter.newType("query", false, CommandParamType.STRING),
 				CommandParameter.newType("page", true, CommandParamType.INT)
 		});
 		addCommandParameters("force_buy", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionForceBuy", "force_buy")),
+				CommandParameter.newEnum("action", false, new String[] { "force_buy" }),
 				CommandParameter.newType("id", false, CommandParamType.INT)
 		});
 		addCommandParameters("force_expire", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionForceExpire", "force_expire")),
+				CommandParameter.newEnum("action", false, new String[] { "force_expire" }),
 				CommandParameter.newType("id", false, CommandParamType.INT)
 		});
 		addCommandParameters("help", new CommandParameter[] {
-				CommandParameter.newEnum("subcommand", false, new CommandEnum("AuctionHelp", "help"))
+				CommandParameter.newEnum("action", false, new String[] { "help" })
 		});
 		this.enableParamTree();
-	}
-
-	@Override
-	public boolean execute(CommandSender sender, String label, String[] args) {
-		if (!testPermission(sender)) {
-			return true;
-		}
-
-		if (args.length == 0) {
-			if (sender instanceof Player player) {
-				plugin.getAuctionGui().openMain(player, 1);
-			} else {
-				sendHelp(sender);
-			}
-			return true;
-		}
-
-		switch (args[0].toLowerCase()) {
-			case "open", "gui" -> {
-				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
-					return true;
-				}
-				int page = args.length >= 2 ? parseInt(args[1], 1) : 1;
-				plugin.getAuctionGui().openMain(player, page);
-			}
-			case "sell" -> {
-				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
-					return true;
-				}
-				if (args.length < 2) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.sell")));
-					return true;
-				}
-				double price = parseDouble(args[1]);
-				if (price <= 0) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.price-positive")));
-					return true;
-				}
-				Item item = player.getInventory().getItemInHand();
-				if (item == null || item.isNull()) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.item-in-hand")));
-					return true;
-				}
-				Item itemSnapshot = item.clone();
-				runDbAction(player,
-						() -> auctionService.createAuction(player, itemSnapshot, price, price),
-						id -> {
-							if (id <= 0) {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
-								return;
-							}
-							Item hand = player.getInventory().getItemInHand();
-							if (hand != null
-									&& hand.getId() == itemSnapshot.getId()
-									&& hand.getDamage() == itemSnapshot.getDamage()
-									&& hand.getCount() == itemSnapshot.getCount()) {
-								player.getInventory().setItemInHand(Item.get(0));
-							}
-							sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
-						});
-			}
-			case "view" -> {
-				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
-					return true;
-				}
-				if (args.length < 2) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.view")));
-					return true;
-				}
-				int page = args.length >= 3 ? parseInt(args[2], 1) : 1;
-				plugin.getAuctionGui().openViewPlayer(player, args[1], page);
-			}
-			case "search" -> {
-				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
-					return true;
-				}
-				if (args.length < 2) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.search")));
-					return true;
-				}
-				int page = args.length >= 3 ? parseInt(args[2], 1) : 1;
-				plugin.getAuctionGui().openSearch(player, args[1], page);
-			}
-			case "force_buy" -> {
-				if (!sender.hasPermission("astraauction.force")) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.no-permission")));
-					return true;
-				}
-				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
-					return true;
-				}
-				if (args.length < 2) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_buy")));
-					return true;
-				}
-				long id = parseLong(args[1], -1);
-				if (id <= 0) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_buy")));
-					return true;
-				}
-				runDbAction(player,
-						() -> auctionService.forceBuy(player, id),
-						ok -> {
-							if (ok) {
-								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
-							} else {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
-							}
-						});
-			}
-			case "force_expire" -> {
-				if (!sender.hasPermission("astraauction.force")) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.no-permission")));
-					return true;
-				}
-				if (args.length < 2) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_expire")));
-					return true;
-				}
-				long id = parseLong(args[1], -1);
-				if (id <= 0) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_expire")));
-					return true;
-				}
-				runDbAction(sender,
-						() -> auctionService.forceExpire(id),
-						ok -> {
-							if (ok) {
-								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
-							} else {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
-							}
-						});
-			}
-			case "help" -> sendHelp(sender);
-			default -> sendHelp(sender);
-		}
-
-		return true;
 	}
 
 	@Override
@@ -224,7 +79,7 @@ public class AuctionCommand extends Command {
 			}
 			case "open" -> {
 				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.only-player")));
 					return 0;
 				}
 				int page = list.hasResult(1) ? normalizePage(list.getResult(1)) : 1;
@@ -233,25 +88,29 @@ public class AuctionCommand extends Command {
 			}
 			case "sell" -> {
 				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.only-player")));
 					return 0;
 				}
-				double price = readPrice(list.getResult(1));
+				double price = auctionService.normalizePrice(readPrice(list.getResult(1)));
 				if (price <= 0) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.price-positive")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.price-positive")));
 					return 0;
 				}
 				Item item = player.getInventory().getItemInHand();
 				if (item == null || item.isNull()) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.item-in-hand")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.item-in-hand")));
 					return 0;
 				}
 				Item itemSnapshot = item.clone();
 				runDbAction(player,
 						() -> auctionService.createAuction(player, itemSnapshot, price, price),
 						id -> {
+							if (id == -1) {
+								sender.sendMessage(MessageUtil.error(t(sender, "messages.slots-limit")));
+								return;
+							}
 							if (id <= 0) {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.slots-limit")));
+								sender.sendMessage(MessageUtil.error(t(sender, "messages.db.error")));
 								return;
 							}
 							Item hand = player.getInventory().getItemInHand();
@@ -261,13 +120,13 @@ public class AuctionCommand extends Command {
 									&& hand.getCount() == itemSnapshot.getCount()) {
 								player.getInventory().setItemInHand(Item.get(0));
 							}
-							sender.sendMessage(MessageUtil.success(Lang.t("messages.lot-listed", "id", id)));
+							sender.sendMessage(MessageUtil.success(t(sender, "messages.lot-listed", "id", id)));
 						});
 				return 1;
 			}
 			case "view" -> {
 				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.only-player")));
 					return 0;
 				}
 				String target = list.getResult(1);
@@ -277,7 +136,7 @@ public class AuctionCommand extends Command {
 			}
 			case "search" -> {
 				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.only-player")));
 					return 0;
 				}
 				String query = list.getResult(1);
@@ -287,46 +146,46 @@ public class AuctionCommand extends Command {
 			}
 			case "force_buy" -> {
 				if (!sender.hasPermission("astraauction.force")) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.no-permission")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.no-permission")));
 					return 0;
 				}
 				if (!(sender instanceof Player player)) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.only-player")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.only-player")));
 					return 0;
 				}
 				long id = normalizeId(list.getResult(1));
 				if (id <= 0) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_buy")));
+					sender.sendMessage(MessageUtil.info(t(sender, "messages.usage.force_buy")));
 					return 0;
 				}
 				runDbAction(player,
 						() -> auctionService.forceBuy(player, id),
 						ok -> {
 							if (ok) {
-								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.buy.ok")));
+								sender.sendMessage(MessageUtil.success(t(sender, "messages.force.buy.ok")));
 							} else {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.buy.fail")));
+								sender.sendMessage(MessageUtil.error(t(sender, "messages.force.buy.fail")));
 							}
 						});
 				return 1;
 			}
 			case "force_expire" -> {
 				if (!sender.hasPermission("astraauction.force")) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.no-permission")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.no-permission")));
 					return 0;
 				}
 				long id = normalizeId(list.getResult(1));
 				if (id <= 0) {
-					sender.sendMessage(MessageUtil.info(Lang.t("messages.usage.force_expire")));
+					sender.sendMessage(MessageUtil.info(t(sender, "messages.usage.force_expire")));
 					return 0;
 				}
 				runDbAction(sender,
 						() -> auctionService.forceExpire(id),
 						ok -> {
 							if (ok) {
-								sender.sendMessage(MessageUtil.success(Lang.t("messages.force.expire.ok")));
+								sender.sendMessage(MessageUtil.success(t(sender, "messages.force.expire.ok")));
 							} else {
-								sender.sendMessage(MessageUtil.error(Lang.t("messages.force.expire.fail")));
+								sender.sendMessage(MessageUtil.error(t(sender, "messages.force.expire.fail")));
 							}
 						});
 				return 1;
@@ -343,10 +202,10 @@ public class AuctionCommand extends Command {
 	}
 
 	private void sendHelp(CommandSender sender) {
-		sender.sendMessage(MessageUtil.info(Lang.t("messages.help.open")));
-		sender.sendMessage(MessageUtil.info(Lang.t("messages.help.sell")));
-		sender.sendMessage(MessageUtil.info(Lang.t("messages.help.view")));
-		sender.sendMessage(MessageUtil.info(Lang.t("messages.help.search")));
+		sender.sendMessage(MessageUtil.info(t(sender, "messages.help.open")));
+		sender.sendMessage(MessageUtil.info(t(sender, "messages.help.sell")));
+		sender.sendMessage(MessageUtil.info(t(sender, "messages.help.view")));
+		sender.sendMessage(MessageUtil.info(t(sender, "messages.help.search")));
 	}
 
 	private double parseDouble(String value) {
@@ -421,7 +280,7 @@ public class AuctionCommand extends Command {
 				}
 				Object result = getResult();
 				if (result instanceof Exception e) {
-					sender.sendMessage(MessageUtil.error(Lang.t("messages.db.error")));
+					sender.sendMessage(MessageUtil.error(t(sender, "messages.db.error")));
 					plugin.getLogger().warning("DB query failed: " + e.getMessage());
 					return;
 				}
@@ -430,5 +289,12 @@ public class AuctionCommand extends Command {
 				onSuccess.accept(data);
 			}
 		});
+	}
+
+	private String t(CommandSender sender, String key, Object... placeholders) {
+		if (sender instanceof Player player) {
+			return Lang.t(player, key, placeholders);
+		}
+		return Lang.t(key, placeholders);
 	}
 }

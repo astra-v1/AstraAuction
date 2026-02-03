@@ -1,5 +1,6 @@
 package xyz.taskov1ch.auction.repository;
 
+import java.math.BigInteger;
 import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -7,6 +8,7 @@ import java.util.function.Function;
 import org.jooq.DSLContext;
 import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.SQLDialect;
 import org.jooq.impl.SQLDataType;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -61,15 +63,9 @@ public class AuctionRepository {
 					.constraints(DSL.constraint("pk_auction_items").primaryKey(ID))
 					.execute();
 
-			dsl.createIndexIfNotExists("idx_auction_status_end")
-					.on(AUCTION_ITEMS, STATUS, END_AT)
-					.execute();
-			dsl.createIndexIfNotExists("idx_auction_seller_status")
-					.on(AUCTION_ITEMS, SELLER_UUID, STATUS)
-					.execute();
-			dsl.createIndexIfNotExists("idx_auction_item_name")
-					.on(AUCTION_ITEMS, ITEM_NAME)
-					.execute();
+			createIndexSafe(dsl, "idx_auction_status_end", AUCTION_ITEMS, STATUS, END_AT);
+			createIndexSafe(dsl, "idx_auction_seller_status", AUCTION_ITEMS, SELLER_UUID, STATUS);
+			createIndexSafe(dsl, "idx_auction_item_name", AUCTION_ITEMS, ITEM_NAME);
 
 			dsl.createTableIfNotExists(AUCTION_CLAIMS)
 					.column(CLAIM_ID, SQLDataType.BIGINT.identity(true))
@@ -100,7 +96,12 @@ public class AuctionRepository {
 					.set(END_AT, item.getEndAt())
 					.returning(ID)
 					.fetchOne();
-			return record == null ? 0L : record.get(ID);
+			if (record != null) {
+				Long id = record.get(ID);
+				return id == null ? 0L : id;
+			}
+			BigInteger lastId = dsl.lastID();
+			return lastId == null ? 0L : lastId.longValue();
 		});
 	}
 
@@ -264,6 +265,31 @@ public class AuctionRepository {
 		} catch (Exception e) {
 			throw new IllegalStateException("Database operation failed", e);
 		}
+	}
+
+	private void createIndexSafe(DSLContext dsl, String indexName, Table<?> table, Field<?>... fields) {
+		SQLDialect family = dsl.dialect().family();
+		if (family == SQLDialect.MYSQL || family == SQLDialect.MARIADB) {
+			if (indexExistsMysql(dsl, indexName, table.getName())) {
+				return;
+			}
+			dsl.createIndex(indexName).on(table, fields).execute();
+			return;
+		}
+		dsl.createIndexIfNotExists(indexName).on(table, fields).execute();
+	}
+
+	private boolean indexExistsMysql(DSLContext dsl, String indexName, String tableName) {
+		Table<?> stats = DSL.table(DSL.name("information_schema", "statistics"));
+		Field<String> tableSchema = DSL.field(DSL.name("table_schema"), String.class);
+		Field<String> tableNameField = DSL.field(DSL.name("table_name"), String.class);
+		Field<String> indexNameField = DSL.field(DSL.name("index_name"), String.class);
+		Field<String> databaseFn = DSL.field("database()", String.class);
+		return dsl.fetchExists(DSL.selectOne()
+				.from(stats)
+				.where(tableSchema.eq(databaseFn))
+				.and(tableNameField.eq(tableName))
+				.and(indexNameField.eq(indexName)));
 	}
 
 	private Field<?>[] auctionItemFields() {

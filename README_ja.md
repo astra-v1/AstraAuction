@@ -4,7 +4,7 @@
 # 💫 AstraAuction β
 **[Lumi](https://github.com/koshakminedev/lumi) 向けのマーケット（オークション）プラグイン。**
 
-**[EN](README.md)** | **[RU](README_ru.md)** | **[UA](README_ua.md)** | **JA** | **[ZH](README_zh.md)**
+**[EN](README.md)** | **[RU](README_ru.md)** | **[UA](README_ua.md)** | **JA**
 
 </div>
 
@@ -21,7 +21,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 - **並べ替えと検索** — 価格での並べ替え、名前検索。
 - **出品管理** — 自分のロットの閲覧・キャンセルを GUI で操作。
 - **柔軟な DB 対応** — SQLite / MySQL / PostgreSQL。
-- **ローカライズ** — `ru` *(русский)*、`en` *(English)*、`ua` *(українська)*、`ja` *(日本語)*、`zh` *(中文)* を標準搭載。独自言語の追加も可能。
+- **ローカライズ** — `rus` *(русский)*、`eng` *(English)*、`ukr` *(українська)*、`jpn` *(日本語)*、 を標準搭載。独自言語の追加も可能。
 
 ## スクリーンショット 🖼️
 | **マーケットメインページ** | **「自分のロット」ページ** |
@@ -55,12 +55,15 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 | パラメータ | 説明 | デフォルト |
 |---|---|---|
 | `database.type` | DB タイプ: `sqlite` / `mysql` / `postgres` | `sqlite` |
-| `language` | メッセージ言語 | `en` |
+| `language.value` | 言語モード: `eng` / `rus` / `ukr` / `jpn` / `autodetect` / `server` | `autodetect` |
+| `language.default` | 既定の言語 | `eng` |
 | `auction.duration-seconds` | ロット有効時間（秒） | `172800` (48h) |
 | `auction.tax-percent` | 取引手数料（%） | `10.0` |
+| `auction.round-prices` | 価格を整数に丸める | `false` |
 | `auction.max-slots` | 同時出品数の上限（0 = 無制限） | `6` |
 | `auction.claim-expire-seconds` | 保管期限（秒） | `604800` (7d) |
 | `auction.gui.page-size` | GUI ページサイズ（最大 45） | `45` |
+| `auction.gui.open-delay-ticks` | GUI の開く遅延（tick） | `10` |
 | `auction.gui.sort-default` | 既定の並べ替え | `price_asc` |
 
 ## 依存関係 🔌

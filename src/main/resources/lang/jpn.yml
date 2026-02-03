@@ -12,6 +12,8 @@ messages:
   slots-limit: "出品上限に達しました。"
   lot-listed: "出品しました。ID: {id}"
   no-permission: "このコマンドを実行する権限がありません。"
+  command:
+    description: "オークションコマンド"
   help:
     open: "/ah - GUIを開く"
     sell: "/ah sell <価格> - 出品する"

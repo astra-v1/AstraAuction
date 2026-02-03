@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "xyz.taskov1ch.auction"
-version = "0.9.46"
+version = "0.10.17"
 
 java {
 	toolchain {
@@ -16,6 +16,20 @@ java {
 repositories {
 	mavenLocal()
 	mavenCentral()
+	maven {
+		name = "luminiadevRepositorySnapshots"
+		url = uri("https://repo.luminiadev.com/snapshots")
+		content {
+			includeGroup "com.koshakmine"
+		}
+	}
+	maven {
+		name = "luminiadevRepositoryReleases"
+		url = uri("https://repo.luminiadev.com/releases")
+		content {
+			includeGroup "com.luminiadev.fakeinventories"
+		}
+	}
 	maven {
 		name "opencollabRepositoryMavenReleases"
 		url "https://repo.opencollab.dev/maven-releases"
@@ -33,8 +47,6 @@ repositories {
 	maven {
 		url "https://jitpack.io"
 		content {
-			includeGroup "com.github.koshakminedev"
-			includeGroup "com.github.LuminiaDev"
 			includeGroup "com.github.MEFRREEX"
 			includeGroup "org.jooq"
 			includeGroup "org.postgresql"
@@ -43,8 +55,8 @@ repositories {
 }
 
 dependencies {
-	implementation "com.github.koshakminedev:lumi:nightly"
-	compileOnly "com.github.LuminiaDev:FakeInventories:1.2.1"
+	compileOnly "com.koshakmine:Lumi:1.4.0-SNAPSHOT"
+	compileOnly "com.luminiadev.fakeinventories:fakeinventories:1.2.1"
 	implementation "com.github.MEFRREEX:JOOQConnector:1.0.1"
 	implementation "org.jooq:jooq:3.20.11"
 	implementation "me.onebone:economyapi:2.0.3"

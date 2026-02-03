@@ -21,14 +21,19 @@ database:
     username: "postgres"
     password: ""
 
-# Language file code (en, ru, ua, ja, zh)
-language: "en"
+language:
+  # Language mode: eng | rus | ukr | jpn | autodetect | server
+  value: "autodetect"
+  # Default language for Polyglot
+  default: "eng"
 
 auction:
   # Lot duration in seconds (default: 48 hours)
   duration-seconds: 172800
   # Commission percent taken from the seller on purchase
   tax-percent: 10.0
+  # Round prices to whole numbers (no cents)
+  round-prices: false
   # Maximum active lots per player (0 = no limit)
   max-slots: 6
   # Claim storage lifetime in seconds
@@ -36,5 +41,7 @@ auction:
   gui:
     # Items per page (max 45)
     page-size: 45
+    # GUI open delay in ticks
+    open-delay-ticks: 10
     # Default sort: price_asc | price_desc
     sort-default: "price_asc"

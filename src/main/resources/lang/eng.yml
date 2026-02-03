@@ -1,5 +1,7 @@
 prefix: "&8[&6AstraAuction&8]&r "
 messages:
+  command:
+    description: "Auction commands"
   only-player: "This command is for players only."
   usage:
     sell: "Usage: /ah sell <price>"
