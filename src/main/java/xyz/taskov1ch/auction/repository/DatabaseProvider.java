@@ -34,16 +34,6 @@ public class DatabaseProvider {
 						configManager.getMySqlUsername(),
 						configManager.getMySqlPassword());
 			}
-			case "postgres", "postgresql" -> {
-				String host = configManager.getPostgresHost();
-				int port = configManager.getPostgresPort();
-				String hostWithPort = host != null && host.contains(":") ? host : host + ":" + port;
-				database = new PostgresDatabase(
-						hostWithPort,
-						configManager.getPostgresDatabase(),
-						configManager.getPostgresUsername(),
-						configManager.getPostgresPassword());
-			}
 			default -> {
 				File sqliteFolder = new File(plugin.getDataFolder(), configManager.getSqliteFolder());
 				if (!sqliteFolder.exists()) {

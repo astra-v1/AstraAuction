@@ -20,7 +20,7 @@ The plugin preserves full item NBT, stores data in a database, and provides a cl
 - **GUI market** — buying, confirmation dialogs, and page navigation.
 - **Sorting and search** — sort by price and search by item name.
 - **Manage your lots** — view and cancel active lots via GUI.
-- **Flexible database support** — SQLite / MySQL / PostgreSQL.
+- **Flexible database support** — SQLite / MySQL.
 - **Localization** — built-in support for `eng`, `rus`, `ukr`, `jpn`, with the ability to add custom languages.
 
 ## Screenshots 🖼️
@@ -54,7 +54,7 @@ Main configuration file: [config.yml](src/main/resources/config.yml)
 
 | Parameter | Description | Default |
 |---|---|---|
-| `database.type` | Database type: `sqlite` / `mysql` / `postgres` | `sqlite` |
+| `database.type` | Database type: `sqlite` / `mysql` | `sqlite` |
 | `language.value` | Language mode: `eng` / `rus` / `ukr` / `jpn` / `autodetect` / `server` | `autodetect` |
 | `language.default` | Default language | `eng` |
 | `auction.duration-seconds` | Lot lifetime (seconds) | `172800` (48h) |

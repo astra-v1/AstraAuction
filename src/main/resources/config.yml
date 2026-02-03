@@ -1,5 +1,5 @@
 database:
-  # Database type: sqlite | mysql | postgres
+  # Database type: sqlite | mysql
   type: "sqlite"
   sqlite:
     # Folder name inside the server directory
@@ -13,18 +13,11 @@ database:
     database: "auction"
     username: "root"
     password: ""
-  postgres:
-    # PostgreSQL connection settings
-    host: "localhost"
-    port: 5432
-    database: "auction"
-    username: "postgres"
-    password: ""
 
 language:
   # Language mode: eng | rus | ukr | jpn | autodetect | server
   value: "autodetect"
-  # Default language for Polyglot
+  # Default language if autodetect/server fails
   default: "eng"
 
 auction:

@@ -20,7 +20,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 - **GUI マーケット** — 購入、確認ダイアログ、ページ移動。
 - **並べ替えと検索** — 価格での並べ替え、名前検索。
 - **出品管理** — 自分のロットの閲覧・キャンセルを GUI で操作。
-- **柔軟な DB 対応** — SQLite / MySQL / PostgreSQL。
+- **柔軟な DB 対応** — SQLite / MySQL。
 - **ローカライズ** — `rus` *(русский)*、`eng` *(English)*、`ukr` *(українська)*、`jpn` *(日本語)*、 を標準搭載。独自言語の追加も可能。
 
 ## スクリーンショット 🖼️
@@ -54,7 +54,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 
 | パラメータ | 説明 | デフォルト |
 |---|---|---|
-| `database.type` | DB タイプ: `sqlite` / `mysql` / `postgres` | `sqlite` |
+| `database.type` | DB タイプ: `sqlite` / `mysql` | `sqlite` |
 | `language.value` | 言語モード: `eng` / `rus` / `ukr` / `jpn` / `autodetect` / `server` | `autodetect` |
 | `language.default` | 既定の言語 | `eng` |
 | `auction.duration-seconds` | ロット有効時間（秒） | `172800` (48h) |

@@ -81,7 +81,6 @@ gui:
     price: "Цена: {price}"
     remaining: "Осталось: {time}"
     id: "ID: {id}"
-    shift_hint: "Shift для просмотра чар"
   confirm:
     title: "Подтверждение покупки"
     buy: "Купить за {price}"

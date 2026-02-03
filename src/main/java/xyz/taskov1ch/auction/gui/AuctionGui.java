@@ -309,7 +309,6 @@ public class AuctionGui {
 					TextFormat.GRAY + t(player, "gui.lore.remaining", "time",
 							formatDuration(player, auction.getEndAt() - System.currentTimeMillis())),
 					TextFormat.DARK_GRAY + t(player, "gui.lore.id", "id", auction.getId()),
-					TextFormat.DARK_GRAY + t(player, "gui.lore.shift_hint")
 			});
 
 			bindItem(inventory, player, i, view, clicker -> {

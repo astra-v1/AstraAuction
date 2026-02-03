@@ -81,7 +81,6 @@ gui:
     price: "価格: {price}"
     remaining: "残り: {time}"
     id: "ID: {id}"
-    shift_hint: "Shiftで詳細を見る"
   confirm:
     title: "購入確認"
     buy: "購入 {price}"
