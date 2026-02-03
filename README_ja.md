@@ -36,7 +36,7 @@ AstraAuction は [Lumi](https://github.com/koshakminedev/lumi) 向けのプレ�
 | **コマンド** | **説明** | **権限** |
 |---|---|---|
 | `/ah` | マーケットを開く | `astraauction.use` |
-| `/ah open,gui [page: int]` | 指定ページでマーケットを開く | `astraauction.use` |
+| `/ah open [page: int]` | 指定ページでマーケットを開く | `astraauction.use` |
 | `/ah sell <price: int>` | 手に持っているアイテムを出品 | `astraauction.use` |
 | `/ah view <nickname: str> [page: int]` | 指定プレイヤーのロットを見る | `astraauction.use` |
 | `/ah search <query: str> [page: int]` | 名前でロット検索 | `astraauction.use` |

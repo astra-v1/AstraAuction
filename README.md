@@ -36,7 +36,7 @@ The plugin preserves full item NBT, stores data in a database, and provides a cl
 | **Command** | **Description** | **Permission** |
 |---|---|---|
 | `/ah` | Open the market | `astraauction.use` |
-| `/ah open,gui [page: int]` | Open the market at a specific page | `astraauction.use` |
+| `/ah open [page: int]` | Open the market at a specific page | `astraauction.use` |
 | `/ah sell <price: int>` | List the item in hand | `astraauction.use` |
 | `/ah view <nickname: str> [page: int]` | View lots of a specific player | `astraauction.use` |
 | `/ah search <query: str> [page: int]` | Search lots by name | `astraauction.use` |
